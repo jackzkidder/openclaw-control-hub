@@ -24,7 +24,7 @@ function FileTypeIcon({ type }: { type: string }) {
     MD: 'text-secondary bg-secondary/10 border-secondary/20',
     DOCX: 'text-status-warning bg-status-warning/10 border-status-warning/20',
   };
-  const cls = colorMap[type] ?? 'text-muted-foreground bg-white/[0.05] border-white/[0.07]';
+  const cls = colorMap[type] ?? 'text-[var(--text-muted)] bg-[var(--surface-muted)] border-[var(--border)]';
 
   return (
     <div className={`w-10 h-12 rounded-card flex items-center justify-center border text-xs font-bold flex-shrink-0 ${cls}`}>
@@ -245,7 +245,7 @@ export function DropZone({ onUploaded }: DropZoneProps) {
         className={`relative cursor-pointer rounded-panel border-2 border-dashed p-8 flex flex-col items-center justify-center gap-3 transition-colors select-none ${
           isDragOver
             ? 'border-primary/60 bg-primary/5'
-            : 'border-white/[0.12] bg-white/[0.03] hover:border-white/[0.2] hover:bg-white/[0.04]'
+            : 'border-[var(--border)] bg-[var(--surface-muted)] hover:border-[var(--border-strong)] hover:bg-[var(--surface-strong)]'
         }`}
       >
         {/* Animated border glow on drag-over */}
@@ -279,7 +279,7 @@ export function DropZone({ onUploaded }: DropZoneProps) {
           className={`w-12 h-12 rounded-full border flex items-center justify-center ${
             isDragOver
               ? 'bg-primary/10 border-primary/30 text-primary'
-              : 'bg-white/[0.05] border-white/[0.1] text-muted-foreground'
+              : 'bg-[var(--surface-muted)] border-[var(--border)] text-[var(--text-muted)]'
           }`}
         >
           <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -288,7 +288,7 @@ export function DropZone({ onUploaded }: DropZoneProps) {
         </motion.div>
 
         <div className="text-center">
-          <p className={`text-sm font-medium ${isDragOver ? 'text-primary' : 'text-white/80'}`}>
+          <p className={`text-sm font-medium ${isDragOver ? 'text-primary' : 'text-[var(--text)]'}`}>
             {isDragOver ? 'Release to add files' : 'Drag & drop files here'}
           </p>
           <p className="text-xs text-muted-foreground mt-1">
@@ -300,7 +300,7 @@ export function DropZone({ onUploaded }: DropZoneProps) {
           {['PDF', 'TXT', 'MD', 'DOCX'].map((ext) => (
             <span
               key={ext}
-              className="px-1.5 py-0.5 rounded text-xs font-mono bg-white/[0.05] border border-white/[0.07] text-muted-foreground"
+              className="px-1.5 py-0.5 rounded text-xs font-mono text-[var(--text-muted)] bg-[var(--surface-muted)] border border-[var(--border)]"
             >
               .{ext.toLowerCase()}
             </span>
@@ -332,7 +332,7 @@ export function DropZone({ onUploaded }: DropZoneProps) {
             exit={{ opacity: 0, height: 0 }}
             className="overflow-hidden"
           >
-            <div className="rounded-panel bg-white/[0.03] border border-white/[0.07] divide-y divide-white/[0.04]">
+            <div className="rounded-panel divide-y divide-[var(--border)]" style={{ background: 'var(--surface-muted)', border: '1px solid var(--border)' }}>
               {pendingFiles.map((item) => {
                 const state = uploadStates[item.file.name];
                 const isUploading = state?.status === 'uploading';
@@ -351,12 +351,12 @@ export function DropZone({ onUploaded }: DropZoneProps) {
                     <FileTypeIcon type={item.typeLabel} />
 
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-white truncate">{item.file.name}</p>
+                      <p className="text-sm font-medium truncate" style={{ color: 'var(--text)' }}>{item.file.name}</p>
                       <p className="text-xs text-muted-foreground">{formatFileSize(item.file.size)}</p>
 
                       {/* Progress bar */}
                       {(isUploading || isSuccess) && (
-                        <div className="mt-1.5 h-1 rounded-full bg-white/[0.07] overflow-hidden">
+                        <div className="mt-1.5 h-1 rounded-full overflow-hidden" style={{ background: 'var(--surface-strong)' }}>
                           <motion.div
                             className={`h-full rounded-full ${isSuccess ? 'bg-status-online' : 'bg-primary'}`}
                             initial={{ width: 0 }}

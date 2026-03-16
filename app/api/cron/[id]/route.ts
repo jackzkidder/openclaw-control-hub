@@ -10,7 +10,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     const body = await req.json()
 
     const setClauses: string[] = []
-    const args: unknown[] = []
+    const args: import('@libsql/client').InValue[] = []
 
     if (body.isEnabled !== undefined) { setClauses.push('is_enabled = ?'); args.push(Number(body.isEnabled)) }
     if (body.name !== undefined) { setClauses.push('name = ?'); args.push(body.name) }

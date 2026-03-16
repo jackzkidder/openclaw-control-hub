@@ -6,7 +6,7 @@ import { ConversationFeed } from '@/components/conversations/ConversationFeed'
 
 export default function ConversationsPage() {
   return (
-    <div className="flex flex-col h-full min-h-0">
+    <div className="flex flex-col h-full min-h-0" style={{ background: 'var(--bg)' }}>
       <TopBar title="Conversations" subtitle="Agent communication feed" />
 
       <motion.div

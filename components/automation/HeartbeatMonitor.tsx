@@ -25,12 +25,12 @@ function StatCard({
   };
 
   return (
-    <div className="flex flex-col gap-2 p-3 rounded-card bg-white/[0.03] border border-white/[0.07]">
+    <div className="flex flex-col gap-2 p-3 rounded-card" style={{ background: 'var(--surface-muted)', border: '1px solid var(--border)' }}>
       <div className={`w-7 h-7 rounded-card flex items-center justify-center border ${accentClasses[accent]}`}>
         {icon}
       </div>
       <div>
-        <p className="text-lg font-semibold text-white leading-none">{value}</p>
+        <p className="text-lg font-semibold leading-none" style={{ color: 'var(--text)' }}>{value}</p>
         <p className="text-xs text-muted-foreground mt-1">{label}</p>
       </div>
     </div>
@@ -88,10 +88,10 @@ export function HeartbeatMonitor() {
   // Live counter — ticks every second
   useEffect(() => {
     if (intervalRef.current) clearInterval(intervalRef.current);
-    if (!heartbeat?.lastHeartbeatAt) return;
+    if (!heartbeat?.lastAt) return;
 
     const tick = () => {
-      const diff = Math.floor((Date.now() - new Date(heartbeat.lastHeartbeatAt).getTime()) / 1000);
+      const diff = Math.floor((Date.now() - new Date(heartbeat.lastAt).getTime()) / 1000);
       setElapsedSeconds(diff);
     };
     tick();
@@ -99,12 +99,12 @@ export function HeartbeatMonitor() {
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
     };
-  }, [heartbeat?.lastHeartbeatAt]);
+  }, [heartbeat?.lastAt]);
 
   // Pulse animation triggered by heartbeat changes
   useEffect(() => {
-    const ts = heartbeat?.lastHeartbeatAt
-      ? new Date(heartbeat.lastHeartbeatAt).getTime()
+    const ts = heartbeat?.lastAt
+      ? new Date(heartbeat.lastAt).getTime()
       : null;
 
     if (ts !== null && ts !== prevHeartbeatRef.current) {
@@ -140,7 +140,7 @@ export function HeartbeatMonitor() {
         return prev;
       });
     }
-  }, [heartbeat?.lastHeartbeatAt, pulseControls, ringControls]);
+  }, [heartbeat?.lastAt, pulseControls, ringControls]);
 
   const isStale = elapsedSeconds > 30;
   const statusColor = !heartbeat
@@ -157,7 +157,7 @@ export function HeartbeatMonitor() {
           <svg className="w-4 h-4 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
           </svg>
-          <h2 className="text-sm font-semibold text-white">Heartbeat Monitor</h2>
+          <h2 className="text-sm font-semibold" style={{ color: 'var(--text)' }}>Heartbeat Monitor</h2>
         </div>
         <div className={`flex items-center gap-1.5 text-xs font-medium ${statusColor}`}>
           <span
@@ -211,10 +211,10 @@ export function HeartbeatMonitor() {
 
       {/* Last heartbeat timestamp */}
       <div className="flex flex-col items-center gap-0.5 -mt-2">
-        {heartbeat?.lastHeartbeatAt ? (
+        {heartbeat?.lastAt ? (
           <>
             <p className="text-xs text-muted-foreground">
-              Last heartbeat: <span className="text-white/80">{formatDateTime(heartbeat.lastHeartbeatAt)}</span>
+              Last heartbeat: <span style={{ color: 'var(--text)' }}>{formatDateTime(heartbeat.lastAt)}</span>
             </p>
             <p className={`text-xs font-medium ${statusColor}`}>
               {elapsedSeconds < 5

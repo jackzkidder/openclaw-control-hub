@@ -2,7 +2,6 @@
 
 import { motion } from 'framer-motion'
 import { Activity, Bot, Zap, AlertTriangle, CheckCircle2, Clock } from 'lucide-react'
-import { cn } from '@/lib/utils/cn'
 import { formatRelativeTime } from '@/lib/utils/formatters'
 
 interface FeedItemProps {
@@ -16,16 +15,18 @@ interface FeedItemProps {
   delay?: number
 }
 
-const typeConfig: Record<string, { icon: typeof Activity; color: string; bg: string }> = {
-  heartbeat:               { icon: Activity,      color: 'text-primary',       bg: 'bg-primary/10' },
-  'agent.status_changed':  { icon: Bot,           color: 'text-secondary',     bg: 'bg-secondary/10' },
-  'agent.message':         { icon: Bot,           color: 'text-secondary',     bg: 'bg-secondary/10' },
-  'agent.tool_call':       { icon: Zap,           color: 'text-amber-400',     bg: 'bg-amber-500/10' },
-  'agent.error':           { icon: AlertTriangle, color: 'text-status-error',  bg: 'bg-status-error/10' },
-  'task.completed':        { icon: CheckCircle2,  color: 'text-status-online', bg: 'bg-status-online/10' },
-  'gateway.connected':     { icon: CheckCircle2,  color: 'text-status-online', bg: 'bg-status-online/10' },
-  'gateway.disconnected':  { icon: AlertTriangle, color: 'text-status-warning',bg: 'bg-status-warning/10' },
-  default:                 { icon: Clock,         color: 'text-muted-foreground',bg: 'bg-white/[0.05]' },
+type EventConfig = { icon: typeof Activity; iconColor: string; bgColor: string }
+
+const typeConfig: Record<string, EventConfig> = {
+  heartbeat:               { icon: Activity,      iconColor: 'var(--info)',    bgColor: 'rgba(37,99,235,0.08)' },
+  'agent.status_changed':  { icon: Bot,           iconColor: 'var(--info)',    bgColor: 'rgba(37,99,235,0.08)' },
+  'agent.message':         { icon: Bot,           iconColor: 'var(--info)',    bgColor: 'rgba(37,99,235,0.08)' },
+  'agent.tool_call':       { icon: Zap,           iconColor: 'var(--warning)', bgColor: 'rgba(217,119,6,0.08)' },
+  'agent.error':           { icon: AlertTriangle, iconColor: 'var(--danger)',  bgColor: 'rgba(220,38,38,0.08)' },
+  'task.completed':        { icon: CheckCircle2,  iconColor: 'var(--success)', bgColor: 'rgba(22,163,74,0.08)' },
+  'gateway.connected':     { icon: CheckCircle2,  iconColor: 'var(--success)', bgColor: 'rgba(22,163,74,0.08)' },
+  'gateway.disconnected':  { icon: AlertTriangle, iconColor: 'var(--warning)', bgColor: 'rgba(217,119,6,0.08)' },
+  default:                 { icon: Clock,         iconColor: 'var(--text-quiet)', bgColor: 'var(--surface-muted)' },
 }
 
 export function FeedItem({ event, delay = 0 }: FeedItemProps) {
@@ -37,21 +38,24 @@ export function FeedItem({ event, delay = 0 }: FeedItemProps) {
       initial={{ opacity: 0, x: -8 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ duration: 0.25, delay }}
-      className="flex items-start gap-3 py-2.5 border-b border-white/[0.04] last:border-0"
+      className="flex items-start gap-3 py-3 px-6"
     >
-      <div className={cn('w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5', config.bg)}>
-        <Icon size={13} className={config.color} />
+      <div
+        className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5"
+        style={{ background: config.bgColor }}
+      >
+        <Icon size={13} style={{ color: config.iconColor }} />
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-xs text-foreground/90 leading-relaxed">{event.summary}</p>
+        <p className="text-xs leading-relaxed" style={{ color: 'var(--text)' }}>{event.summary}</p>
         <div className="flex items-center gap-2 mt-0.5">
-          <span className="text-[10px] text-muted-foreground/50">{event.type}</span>
+          <span className="text-[10px]" style={{ color: 'var(--text-quiet)' }}>{event.type}</span>
           {event.agentId && (
-            <span className="text-[10px] text-muted-foreground/50">· {event.agentId}</span>
+            <span className="text-[10px]" style={{ color: 'var(--text-quiet)' }}>· {event.agentId}</span>
           )}
         </div>
       </div>
-      <span className="text-[10px] text-muted-foreground/40 flex-shrink-0 mt-0.5">
+      <span className="text-[10px] flex-shrink-0 mt-0.5" style={{ color: 'var(--text-quiet)' }}>
         {formatRelativeTime(event.timestamp)}
       </span>
     </motion.div>

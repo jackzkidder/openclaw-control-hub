@@ -30,7 +30,7 @@ export function ConnectionBadge({ status, latencyMs, className, showLatency = fa
     <motion.div
       className={cn(
         'inline-flex items-center gap-2 px-3 py-1.5 rounded-full',
-        'bg-white/[0.04] border border-white/[0.08]',
+        'bg-[var(--surface-muted)] border border-[var(--border)]',
         'text-xs font-medium',
         className
       )}

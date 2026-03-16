@@ -168,7 +168,7 @@ export function TaskDetail({ task, onClose, onDeploy }: TaskDetailProps) {
             key="drawer"
             className={cn(
               'fixed top-0 right-0 z-50 h-full w-full max-w-md',
-              'bg-surface-2/95 backdrop-blur-modal border-l border-white/[0.08]',
+              'bg-surface-2/95 backdrop-blur-modal border-l border-[var(--border)]',
               'flex flex-col shadow-modal'
             )}
             initial={{ x: '100%' }}
@@ -177,7 +177,7 @@ export function TaskDetail({ task, onClose, onDeploy }: TaskDetailProps) {
             transition={{ duration: 0.28, ease: [0.25, 0.46, 0.45, 0.94] }}
           >
             {/* Header */}
-            <div className="flex items-start justify-between px-6 py-5 border-b border-white/[0.06] flex-shrink-0">
+            <div className="flex items-start justify-between px-6 py-5 border-b border-[var(--border)] flex-shrink-0">
               <div className="flex-1 min-w-0 pr-4">
                 <div className="flex items-center gap-2 mb-1.5 flex-wrap">
                   <span className={cn('text-[10px] font-semibold px-2 py-0.5 rounded-full', priorityBadgeConfig[task.priority])}>
@@ -199,7 +199,7 @@ export function TaskDetail({ task, onClose, onDeploy }: TaskDetailProps) {
               </div>
               <button
                 onClick={onClose}
-                className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-white/[0.06] transition-colors flex-shrink-0"
+                className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-[var(--surface-muted)] transition-colors flex-shrink-0"
               >
                 <X size={16} />
               </button>
@@ -278,7 +278,7 @@ export function TaskDetail({ task, onClose, onDeploy }: TaskDetailProps) {
                       {task.tags.map((tag) => (
                         <span
                           key={tag}
-                          className="text-[10px] px-2 py-0.5 rounded-full bg-white/[0.05] border border-white/[0.08] text-muted-foreground"
+                          className="text-[10px] px-2 py-0.5 rounded-full text-[var(--text-muted)] bg-[var(--surface-muted)] border border-[var(--border)]"
                         >
                           {tag}
                         </span>
@@ -314,7 +314,7 @@ export function TaskDetail({ task, onClose, onDeploy }: TaskDetailProps) {
             </div>
 
             {/* Footer actions */}
-            <div className="flex-shrink-0 px-6 py-4 border-t border-white/[0.06] space-y-2">
+            <div className="flex-shrink-0 px-6 py-4 border-t border-[var(--border)] space-y-2">
               <GlowButton
                 variant="primary"
                 size="sm"

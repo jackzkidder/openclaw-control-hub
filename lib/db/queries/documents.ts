@@ -81,6 +81,18 @@ export async function updateDocumentStatus(
   return getDocumentById(id)
 }
 
+export async function attachDocumentToTask(documentId: string, taskId: string): Promise<Document | null> {
+  const existing = await getDocumentById(documentId)
+  if (!existing) return null
+  const db = getDb()
+  const updatedIds = Array.from(new Set([...existing.linkedTaskIds, taskId]))
+  await db.execute({
+    sql: `UPDATE documents SET linked_task_ids = ? WHERE id = ?`,
+    args: [JSON.stringify(updatedIds), documentId],
+  })
+  return getDocumentById(documentId)
+}
+
 export async function deleteDocument(id: string): Promise<boolean> {
   const db = getDb()
   const result = await db.execute({ sql: 'DELETE FROM documents WHERE id = ?', args: [id] })

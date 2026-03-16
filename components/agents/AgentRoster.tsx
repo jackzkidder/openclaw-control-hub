@@ -38,15 +38,19 @@ function FilterButton({ label, active, count, onClick }: FilterButtonProps) {
   return (
     <button
       onClick={onClick}
-      className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium transition-all duration-150 ${
-        active
-          ? 'bg-primary text-surface shadow-glow'
-          : 'bg-white/[0.04] text-muted-foreground border border-white/[0.08] hover:bg-white/[0.08] hover:text-foreground'
-      }`}
+      className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium transition-all duration-150"
+      style={active ? {
+        background: 'var(--accent)',
+        color: 'var(--surface)',
+      } : {
+        background: 'var(--surface-muted)',
+        border: '1px solid var(--border)',
+        color: 'var(--text-muted)',
+      }}
     >
       {label}
       {count !== undefined && (
-        <span className={`text-[10px] tabular-nums ${active ? 'text-surface/70' : 'text-muted-foreground/60'}`}>
+        <span className="text-[10px] tabular-nums" style={{ opacity: 0.7 }}>
           {count}
         </span>
       )}
@@ -64,24 +68,29 @@ function EmptyState({ filtered }: { filtered: boolean }) {
       transition={{ duration: 0.3 }}
       className="col-span-full"
     >
-      <GlassPanel className="flex flex-col items-center justify-center py-14 text-center" variant="subtle">
-        <div className="w-12 h-12 rounded-2xl bg-white/[0.04] border border-white/[0.07] flex items-center justify-center mb-4">
-          <Bot size={20} className="text-muted-foreground/50" />
-        </div>
+      <div
+        className="flex flex-col items-center justify-center text-center p-8 rounded-xl"
+        style={{
+          minHeight: '240px',
+          border: '2px dashed var(--border)',
+          background: 'var(--surface-muted)',
+        }}
+      >
+        <Bot size={32} style={{ color: 'var(--text-quiet)' }} />
         {filtered ? (
           <>
-            <p className="text-sm font-medium text-foreground mb-1">No agents match your filters</p>
-            <p className="text-xs text-muted-foreground/60">Try adjusting the status filter or search query</p>
+            <p className="text-base font-semibold mt-3" style={{ color: 'var(--text)' }}>No agents match your filters</p>
+            <p className="text-sm mt-1 max-w-xs" style={{ color: 'var(--text-muted)' }}>Try adjusting the status filter or search query</p>
           </>
         ) : (
           <>
-            <p className="text-sm font-medium text-foreground mb-1">No agents connected</p>
-            <p className="text-xs text-muted-foreground/60 max-w-xs leading-relaxed">
-              Connect to your OpenClaw Gateway to see live agent data. Agents will appear here automatically.
+            <p className="text-base font-semibold mt-3" style={{ color: 'var(--text)' }}>No agents connected</p>
+            <p className="text-sm mt-1 max-w-xs leading-relaxed" style={{ color: 'var(--text-muted)' }}>
+              Connect to your OpenClaw Gateway to see live agent data.
             </p>
           </>
         )}
-      </GlassPanel>
+      </div>
     </motion.div>
   )
 }
@@ -148,7 +157,7 @@ export function AgentRoster({ onSelect }: AgentRosterProps) {
 
   // Per-status counts for filter badges
   const counts = useMemo(() => {
-    const c: Record<StatusFilter, number> = { all: storeAgents.length, running: 0, idle: 0, error: 0 }
+    const c: Record<StatusFilter, number> = { all: storeAgents.length, running: 0, idle: 0, error: 0, paused: 0, offline: 0 }
     for (const a of storeAgents) {
       if (a.status === 'running') c.running++
       if (a.status === 'idle')    c.idle++
@@ -167,14 +176,20 @@ export function AgentRoster({ onSelect }: AgentRosterProps) {
         <div className="relative flex-1 min-w-[200px]">
           <Search
             size={13}
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground/50 pointer-events-none"
+            className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none"
+            style={{ color: 'var(--text-quiet)' }}
           />
           <input
             type="text"
             placeholder="Search agents…"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full bg-white/[0.04] border border-white/[0.10] rounded-lg pl-8 pr-3 py-2 text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-primary/50 focus:bg-white/[0.06] transition-all"
+            className="w-full rounded-lg pl-8 pr-3 py-2 text-sm focus:outline-none transition-all"
+            style={{
+              background: 'var(--surface)',
+              border: '1px solid var(--border)',
+              color: 'var(--text)',
+            }}
           />
         </div>
 
@@ -196,7 +211,8 @@ export function AgentRoster({ onSelect }: AgentRosterProps) {
         <button
           onClick={() => refetch()}
           disabled={isFetching}
-          className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-white/[0.06] transition-colors disabled:opacity-50"
+          className="p-1.5 rounded-lg transition-colors disabled:opacity-50"
+          style={{ color: 'var(--text-muted)' }}
           title="Refresh agents"
         >
           <RefreshCw size={14} className={isFetching ? 'animate-spin' : ''} />
@@ -208,7 +224,8 @@ export function AgentRoster({ onSelect }: AgentRosterProps) {
         <motion.p
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          className="text-xs text-muted-foreground"
+          className="text-xs"
+          style={{ color: 'var(--text-muted)' }}
         >
           Showing {filteredAgents.length} of {storeAgents.length} agent{storeAgents.length !== 1 ? 's' : ''}
         </motion.p>

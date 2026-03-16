@@ -19,7 +19,7 @@ import {
   useSortable,
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { Plus, LayoutKanban, ChevronDown } from 'lucide-react'
+import { Plus, Kanban, ChevronDown } from 'lucide-react'
 
 import type { Task, TaskStatus, TaskPriority, CreateTaskInput } from '@/lib/openclaw/types'
 import { useTasks, useUpdateTask, useCreateTask } from '@/hooks/useTasks'
@@ -27,6 +27,7 @@ import { GlassPanel } from '@/components/primitives/GlassPanel'
 import { TaskCard } from '@/components/cards/TaskCard'
 import { GlowButton } from '@/components/primitives/GlowButton'
 import { BlurModal } from '@/components/primitives/BlurModal'
+import { TaskDetail } from '@/components/workshop/TaskDetail'
 
 // ─── Column configuration ─────────────────────────────────────────────────────
 
@@ -98,7 +99,7 @@ function KanbanColumn({ config, tasks, onSelect }: KanbanColumnProps) {
         className={`flex flex-col h-full border ${config.color} hover:border-opacity-40 transition-colors`}
       >
         {/* Column header */}
-        <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.06]">
+        <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--border)]">
           <div className="flex items-center gap-2">
             <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${config.headerColor}`}>
               {config.label}
@@ -119,7 +120,7 @@ function KanbanColumn({ config, tasks, onSelect }: KanbanColumnProps) {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  className="flex items-center justify-center h-20 border border-dashed border-white/[0.06] rounded-lg"
+                  className="flex items-center justify-center h-20 border border-dashed border-[var(--border)] rounded-lg"
                 >
                   <p className="text-xs text-muted-foreground/40">Drop here</p>
                 </motion.div>
@@ -171,7 +172,7 @@ function CreateTaskModal({ open, onClose, onSubmit, isLoading }: CreateTaskModal
   }
 
   const inputClass =
-    'w-full bg-white/[0.04] border border-white/[0.10] rounded-lg px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-primary/50 focus:bg-white/[0.06] transition-all'
+    'w-full rounded-lg px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-primary/50 transition-all bg-[var(--surface)] border border-[var(--border)] focus:bg-[var(--surface-muted)]'
 
   const labelClass = 'block text-xs font-medium text-muted-foreground mb-1.5'
 
@@ -256,7 +257,7 @@ function CreateTaskModal({ open, onClose, onSubmit, isLoading }: CreateTaskModal
         </div>
 
         {/* Actions */}
-        <div className="flex items-center justify-end gap-2 pt-2 border-t border-white/[0.06]">
+        <div className="flex items-center justify-end gap-2 pt-2 border-t border-[var(--border)]">
           <GlowButton type="button" variant="ghost" size="sm" onClick={onClose}>
             Cancel
           </GlowButton>
@@ -288,6 +289,7 @@ export function KanbanBoard({ onTaskSelect }: KanbanBoardProps) {
 
   const [activeTaskId, setActiveTaskId]     = useState<string | null>(null)
   const [createModalOpen, setCreateModal]   = useState(false)
+  const [selectedTask, setSelectedTask]     = useState<Task | null>(null)
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } })
@@ -355,7 +357,7 @@ export function KanbanBoard({ onTaskSelect }: KanbanBoardProps) {
       {/* Board header */}
       <div className="flex items-center justify-between px-0.5">
         <div className="flex items-center gap-2">
-          <LayoutKanban size={15} className="text-primary" />
+          <Kanban size={15} className="text-primary" />
           <h2 className="text-sm font-semibold text-foreground">Kanban Board</h2>
           {isLoading && (
             <span className="text-xs text-muted-foreground animate-pulse">Loading…</span>
@@ -390,7 +392,7 @@ export function KanbanBoard({ onTaskSelect }: KanbanBoardProps) {
               key={col.id}
               config={col}
               tasks={tasksByStatus[col.id]}
-              onSelect={(task) => onTaskSelect?.(task)}
+              onSelect={(task) => { setSelectedTask(task); onTaskSelect?.(task) }}
             />
           ))}
         </div>
@@ -411,6 +413,12 @@ export function KanbanBoard({ onTaskSelect }: KanbanBoardProps) {
         onClose={() => setCreateModal(false)}
         onSubmit={handleCreateTask}
         isLoading={createTask.isPending}
+      />
+
+      {/* Task Detail Drawer */}
+      <TaskDetail
+        task={selectedTask}
+        onClose={() => setSelectedTask(null)}
       />
     </div>
   )

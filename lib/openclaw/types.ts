@@ -256,6 +256,7 @@ export interface AppSettings {
   notificationsEnabled: boolean
   appName: string
   setupCompleted: boolean
+  monthlyBudget: number
 }
 
 export const DEFAULT_SETTINGS: AppSettings = {
@@ -273,6 +274,7 @@ export const DEFAULT_SETTINGS: AppSettings = {
   notificationsEnabled: true,
   appName: 'Mission Control',
   setupCompleted: false,
+  monthlyBudget: 100,
 }
 
 // ─── Usage / Cost ─────────────────────────────────────────────────────────────
@@ -293,6 +295,13 @@ export interface UsageSummary {
   byAgent: Record<string, TokenUsage>
   byModel: Record<string, TokenUsage>
   dailyTrend: UsageDataPoint[]
+  totalTokensToday?: number
+  promptTokensToday?: number
+  completionTokensToday?: number
+  totalCostToday?: number
+  costTrendPercent?: number | null
+  mostActiveAgent?: { name: string; tokens: number } | null
+  costYesterday?: number
 }
 
 // ─── Webhook ──────────────────────────────────────────────────────────────────

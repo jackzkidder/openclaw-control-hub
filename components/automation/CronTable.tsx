@@ -46,7 +46,7 @@ function humanReadableCron(expression: string): string {
 function StatusBadge({ status }: { status: CronJob['lastRunStatus'] }) {
   if (status === null || status === undefined) {
     return (
-      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-white/[0.05] text-muted-foreground border border-white/[0.07]">
+      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium" style={{ background: 'var(--surface-muted)', color: 'var(--text-muted)', border: '1px solid var(--border)' }}>
         Never run
       </span>
     );
@@ -83,9 +83,8 @@ function Toggle({
       aria-checked={checked}
       disabled={disabled}
       onClick={() => onChange(!checked)}
-      className={`relative inline-flex h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed ${
-        checked ? 'bg-primary' : 'bg-white/[0.1]'
-      }`}
+      className="relative inline-flex h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+      style={{ background: checked ? 'var(--accent)' : 'var(--surface-strong)' }}
     >
       <span
         className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
@@ -101,15 +100,19 @@ function EmptyState() {
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      className="flex flex-col items-center justify-center py-16 text-center"
+      className="flex flex-col items-center justify-center text-center p-8 m-4 rounded-xl"
+      style={{ minHeight: '200px', border: '2px dashed var(--border)', background: 'var(--surface-muted)' }}
     >
-      <div className="w-16 h-16 rounded-full bg-white/[0.03] border border-white/[0.07] flex items-center justify-center mb-4">
-        <svg className="w-7 h-7 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <div
+        className="w-16 h-16 rounded-full flex items-center justify-center mb-4"
+        style={{ background: 'var(--surface-muted)', border: '1px solid var(--border)' }}
+      >
+        <svg className="w-7 h-7" style={{ color: 'var(--text-quiet)' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
       </div>
-      <p className="text-sm font-medium text-muted-foreground">No cron jobs scheduled</p>
-      <p className="text-xs text-muted-foreground/60 mt-1">Create a cron job to automate recurring tasks.</p>
+      <p className="text-sm font-semibold mt-2" style={{ color: 'var(--text)' }}>No cron jobs scheduled</p>
+      <p className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>Create a cron job to automate recurring tasks.</p>
     </motion.div>
   );
 }
@@ -142,12 +145,15 @@ function CronRow({
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: 20 }}
       transition={{ duration: 0.2, delay: index * 0.05 }}
-      className="border-b border-white/[0.04] last:border-0 hover:bg-white/[0.02] transition-colors"
+      className="transition-colors"
+      style={{ borderBottom: '1px solid var(--border)' }}
+      onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = 'var(--surface-muted)' }}
+      onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = 'transparent' }}
     >
       {/* Job Name */}
       <td className="px-4 py-3">
         <div className="flex flex-col gap-0.5">
-          <span className="text-sm font-medium text-white">{job.name}</span>
+          <span className="text-sm font-medium" style={{ color: 'var(--text)' }}>{job.name}</span>
           {job.description && (
             <span className="text-xs text-muted-foreground line-clamp-1">{job.description}</span>
           )}
@@ -166,10 +172,10 @@ function CronRow({
 
       {/* Next Run */}
       <td className="px-4 py-3">
-        {job.nextRun ? (
+        {job.nextRunAt ? (
           <div className="flex flex-col gap-0.5">
-            <span className="text-xs text-white/80">{formatDateTime(job.nextRun)}</span>
-            <span className="text-xs text-muted-foreground">{formatRelativeTime(job.nextRun)}</span>
+            <span className="text-xs" style={{ color: 'var(--text)' }}>{formatDateTime(job.nextRunAt)}</span>
+            <span className="text-xs text-muted-foreground">{formatRelativeTime(job.nextRunAt)}</span>
           </div>
         ) : (
           <span className="text-xs text-muted-foreground">—</span>
@@ -189,7 +195,7 @@ function CronRow({
       {/* Enabled Toggle */}
       <td className="px-4 py-3">
         <Toggle
-          checked={job.enabled}
+          checked={job.isEnabled}
           onChange={(val) => onToggle(job.id, val)}
           disabled={isTogglingId === job.id}
         />
@@ -201,7 +207,7 @@ function CronRow({
           <GlowButton
             size="sm"
             variant="secondary"
-            disabled={isRunningId === job.id || !job.enabled}
+            disabled={isRunningId === job.id || !job.isEnabled}
             onClick={() => onRunNow(job.id)}
             className="text-xs"
           >
@@ -300,14 +306,14 @@ export function CronTable() {
 
   return (
     <GlassPanel className="overflow-hidden">
-      <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.07]">
+      <div className="flex items-center justify-between px-4 py-3" style={{ borderBottom: '1px solid var(--border)' }}>
         <div className="flex items-center gap-2">
           <svg className="w-4 h-4 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
-          <h2 className="text-sm font-semibold text-white">Scheduled Jobs</h2>
+          <h2 className="text-sm font-semibold" style={{ color: 'var(--text)' }}>Scheduled Jobs</h2>
           {!isLoading && (
-            <span className="px-1.5 py-0.5 rounded-full text-xs bg-white/[0.05] text-muted-foreground border border-white/[0.07]">
+            <span className="px-1.5 py-0.5 rounded-full text-xs" style={{ background: 'var(--surface-muted)', color: 'var(--text-muted)', border: '1px solid var(--border)' }}>
               {jobs.length}
             </span>
           )}
@@ -330,13 +336,13 @@ export function CronTable() {
       )}
 
       {isLoading ? (
-        <div className="divide-y divide-white/[0.04]">
+        <div className="divide-y divide-[var(--border)]">
           {Array.from({ length: 3 }).map((_, i) => (
             <div key={i} className="px-4 py-3 animate-pulse">
               <div className="flex items-center gap-4">
-                <div className="h-4 w-32 bg-white/[0.05] rounded" />
-                <div className="h-4 w-24 bg-white/[0.05] rounded" />
-                <div className="h-4 w-28 bg-white/[0.05] rounded ml-auto" />
+                <div className="h-4 w-32 rounded" style={{ background: 'var(--surface-strong)' }} />
+                <div className="h-4 w-24 rounded" style={{ background: 'var(--surface-strong)' }} />
+                <div className="h-4 w-28 rounded ml-auto" style={{ background: 'var(--surface-strong)' }} />
               </div>
             </div>
           ))}
@@ -347,11 +353,12 @@ export function CronTable() {
         <div className="overflow-x-auto">
           <table className="w-full min-w-[700px]">
             <thead>
-              <tr className="border-b border-white/[0.04]">
+              <tr style={{ background: 'var(--surface-muted)', borderBottom: '1px solid var(--border-strong)' }}>
                 {['Job Name', 'Schedule', 'Next Run', 'Last Status', 'Enabled', 'Actions'].map((h) => (
                   <th
                     key={h}
-                    className="px-4 py-2.5 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider"
+                    className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider"
+                    style={{ color: 'var(--text-quiet)' }}
                   >
                     {h}
                   </th>

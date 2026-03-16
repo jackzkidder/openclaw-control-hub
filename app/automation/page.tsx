@@ -1,12 +1,11 @@
 'use client'
 
 import { useState } from 'react'
-import { motion } from 'framer-motion'
-import { Plus, Clock, AlarmClock, AlertCircle } from 'lucide-react'
+import { Plus, Clock, AlertCircle } from 'lucide-react'
+import { AnimatePresence, motion } from 'framer-motion'
 import { TopBar } from '@/components/layout/TopBar'
 import { GlowButton } from '@/components/primitives/GlowButton'
 import { BlurModal } from '@/components/primitives/BlurModal'
-import { GlassPanel } from '@/components/primitives/GlassPanel'
 import { HeartbeatMonitor } from '@/components/automation/HeartbeatMonitor'
 import { CronTable } from '@/components/automation/CronTable'
 
@@ -26,18 +25,7 @@ const defaultForm: NewCronForm = {
   enabled: true,
 }
 
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: { staggerChildren: 0.08, delayChildren: 0.05 },
-  },
-}
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 14 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.38, ease: [0.25, 0.1, 0.25, 1] } },
-}
+const inputClass = 'w-full rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 transition-all'
 
 export default function AutomationPage() {
   const [newCronOpen, setNewCronOpen] = useState(false)
@@ -88,43 +76,42 @@ export default function AutomationPage() {
   }
 
   const commonSchedules = [
-    { label: 'Every hour', value: '0 * * * *' },
-    { label: 'Every 6 hours', value: '0 */6 * * *' },
-    { label: 'Daily at midnight', value: '0 0 * * *' },
+    { label: 'Every hour',       value: '0 * * * *' },
+    { label: 'Every 6 hours',    value: '0 */6 * * *' },
+    { label: 'Daily at midnight',value: '0 0 * * *' },
     { label: 'Every Monday 9am', value: '0 9 * * 1' },
   ]
 
-  const actions = (
-    <GlowButton
-      size="sm"
-      onClick={() => setNewCronOpen(true)}
-      icon={<Plus className="w-4 h-4" />}
-    >
-      New Cron Job
-    </GlowButton>
-  )
-
   return (
-    <div className="flex flex-col h-full min-h-0">
-      <TopBar title="Automation" subtitle="Cron jobs & heartbeat" actions={actions} />
+    <div className="flex flex-col h-full min-h-0" style={{ background: 'var(--bg)' }}>
+      <TopBar
+        title="Automation"
+        subtitle="Cron jobs & heartbeat"
+        actions={
+          <GlowButton
+            size="sm"
+            onClick={() => setNewCronOpen(true)}
+            icon={<Plus className="w-3.5 h-3.5" />}
+          >
+            New Cron Job
+          </GlowButton>
+        }
+      />
 
-      <div className="flex-1 overflow-y-auto p-6 space-y-6">
-        <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
-          className="space-y-6"
-        >
-          {/* Heartbeat monitor */}
-          <motion.div variants={itemVariants}>
-            <HeartbeatMonitor />
-          </motion.div>
+      <div className="flex-1 overflow-y-auto">
+        <div className="max-w-[1280px] mx-auto p-8 space-y-8">
 
-          {/* Cron table */}
-          <motion.div variants={itemVariants}>
-            <CronTable />
-          </motion.div>
-        </motion.div>
+          <div className="pb-6" style={{ borderBottom: '1px solid var(--border)' }}>
+            <h2 className="text-2xl font-semibold leading-tight tracking-tight" style={{ color: 'var(--text)' }}>Automation</h2>
+            <p className="text-sm mt-1" style={{ color: 'var(--text-muted)' }}>
+              Scheduled cron jobs and real-time heartbeat monitoring.
+            </p>
+          </div>
+
+          <HeartbeatMonitor />
+          <CronTable />
+
+        </div>
       </div>
 
       {/* New Cron Modal */}
@@ -141,30 +128,30 @@ export default function AutomationPage() {
         <form onSubmit={handleCreate} className="space-y-5">
           {/* Name */}
           <div>
-            <label className="block text-xs font-medium text-muted-foreground mb-1.5">
-              Name <span className="text-status-error">*</span>
+            <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--text-muted)' }}>
+              Name <span style={{ color: 'var(--danger)' }}>*</span>
             </label>
             <input
               type="text"
               value={form.name}
               onChange={(e) => updateField('name', e.target.value)}
               placeholder="e.g. Daily Status Report"
-              className="w-full bg-surface-2 border border-white/[0.12] rounded-card px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-colors"
+              className={inputClass}
               autoFocus
             />
           </div>
 
           {/* Schedule */}
           <div>
-            <label className="block text-xs font-medium text-muted-foreground mb-1.5">
-              Cron Schedule <span className="text-status-error">*</span>
+            <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--text-muted)' }}>
+              Cron Schedule <span style={{ color: 'var(--danger)' }}>*</span>
             </label>
             <input
               type="text"
               value={form.schedule}
               onChange={(e) => updateField('schedule', e.target.value)}
               placeholder="* * * * *"
-              className="w-full bg-surface-2 border border-white/[0.12] rounded-card px-3 py-2 text-sm text-foreground font-mono placeholder:text-muted-foreground focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-colors"
+              className={`${inputClass} font-mono`}
             />
             <div className="mt-2 flex flex-wrap gap-1.5">
               {commonSchedules.map((s) => (
@@ -172,7 +159,12 @@ export default function AutomationPage() {
                   key={s.value}
                   type="button"
                   onClick={() => updateField('schedule', s.value)}
-                  className="text-xs px-2 py-1 rounded-full bg-surface-3 border border-white/[0.07] text-muted-foreground hover:text-foreground hover:border-white/[0.12] transition-colors"
+                  className="text-xs px-2.5 py-1 rounded-full transition-colors"
+                  style={{
+                    background: 'var(--surface-muted)',
+                    border: '1px solid var(--border)',
+                    color: 'var(--text-muted)',
+                  }}
                 >
                   {s.label}
                 </button>
@@ -182,7 +174,7 @@ export default function AutomationPage() {
 
           {/* Webhook path */}
           <div>
-            <label className="block text-xs font-medium text-muted-foreground mb-1.5">
+            <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--text-muted)' }}>
               Webhook Path
             </label>
             <input
@@ -190,27 +182,28 @@ export default function AutomationPage() {
               value={form.webhookPath}
               onChange={(e) => updateField('webhookPath', e.target.value)}
               placeholder="/webhook"
-              className="w-full bg-surface-2 border border-white/[0.12] rounded-card px-3 py-2 text-sm text-foreground font-mono placeholder:text-muted-foreground focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-colors"
+              className={`${inputClass} font-mono`}
             />
           </div>
 
           {/* Payload */}
           <div>
-            <label className="block text-xs font-medium text-muted-foreground mb-1.5">
+            <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--text-muted)' }}>
               JSON Payload
             </label>
             <textarea
               value={form.payload}
               onChange={(e) => updateField('payload', e.target.value)}
               rows={4}
-              className={`w-full bg-surface-2 border rounded-card px-3 py-2 text-sm text-foreground font-mono placeholder:text-muted-foreground focus:outline-none transition-colors resize-none ${
-                payloadError
-                  ? 'border-status-error/50 focus:border-status-error focus:ring-1 focus:ring-status-error/20'
-                  : 'border-white/[0.12] focus:border-primary/50 focus:ring-1 focus:ring-primary/20'
-              }`}
+              className="w-full rounded-lg px-3 py-2 text-sm font-mono focus:outline-none transition-all resize-none"
+              style={{
+                background: 'var(--surface)',
+                border: `1px solid ${payloadError ? 'var(--danger)' : 'var(--border)'}`,
+                color: 'var(--text)',
+              }}
             />
             {payloadError && (
-              <div className="mt-1.5 flex items-center gap-1.5 text-xs text-status-error">
+              <div className="mt-1.5 flex items-center gap-1.5 text-xs" style={{ color: 'var(--danger)' }}>
                 <AlertCircle className="w-3.5 h-3.5" />
                 {payloadError}
               </div>
@@ -222,17 +215,18 @@ export default function AutomationPage() {
             <button
               type="button"
               onClick={() => updateField('enabled', !form.enabled)}
-              className={`relative w-10 h-5 rounded-full transition-colors ${
-                form.enabled ? 'bg-primary' : 'bg-surface-3'
-              }`}
+              className="relative w-10 h-5 rounded-full transition-colors"
+              style={{ background: form.enabled ? 'var(--accent)' : 'var(--surface-strong)' }}
             >
               <span
-                className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${
-                  form.enabled ? 'translate-x-5' : 'translate-x-0.5'
-                }`}
+                className="absolute top-0.5 w-4 h-4 rounded-full shadow transition-transform"
+                style={{
+                  background: 'var(--surface)',
+                  transform: form.enabled ? 'translateX(20px)' : 'translateX(2px)',
+                }}
               />
             </button>
-            <span className="text-sm text-muted-foreground">Enable immediately</span>
+            <span className="text-sm" style={{ color: 'var(--text-muted)' }}>Enable immediately</span>
           </div>
 
           <div className="flex justify-end gap-2 pt-1">
@@ -253,7 +247,7 @@ export default function AutomationPage() {
               size="sm"
               disabled={!form.name.trim() || !form.schedule.trim() || isSubmitting}
               loading={isSubmitting}
-              icon={<Clock className="w-4 h-4" />}
+              icon={<Clock className="w-3.5 h-3.5" />}
             >
               Create Job
             </GlowButton>

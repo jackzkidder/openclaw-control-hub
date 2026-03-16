@@ -20,7 +20,18 @@ async function saveSettings(settings: Partial<AppSettings>): Promise<AppSettings
 }
 
 export function useSettings() {
-  return useQuery({ queryKey: ['settings'], queryFn: fetchSettings })
+  const qc = useQueryClient()
+  const query = useQuery({ queryKey: ['settings'], queryFn: fetchSettings })
+  const mutation = useMutation({
+    mutationFn: saveSettings,
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['settings'] }),
+  })
+  return {
+    settings: query.data,
+    isLoading: query.isLoading,
+    saveSettings: mutation.mutateAsync,
+    isSaving: mutation.isPending,
+  }
 }
 
 export function useSaveSettings() {

@@ -34,6 +34,7 @@ interface LiveEvent {
   agentId?: string
   summary: string
   timestamp: string
+  payload?: Record<string, unknown>
 }
 
 interface EventsSlice {
@@ -45,6 +46,7 @@ interface EventsSlice {
     lastAt: string
   } | null
   addEvent: (event: LiveEvent) => void
+  clearEvents: () => void
   setHeartbeat: (payload: { serverTime: string; activeAgents: number; queuedTasks: number }) => void
 }
 
@@ -111,6 +113,10 @@ export const useAppStore = create<AppStore>()(
               if (s.recentEvents.length > 100) {
                 s.recentEvents = s.recentEvents.slice(0, 100)
               }
+            }),
+          clearEvents: () =>
+            set((s) => {
+              s.recentEvents = []
             }),
           setHeartbeat: (payload) =>
             set((s) => {

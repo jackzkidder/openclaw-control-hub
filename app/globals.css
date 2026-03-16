@@ -5,114 +5,130 @@
 @layer base {
   * { box-sizing: border-box; }
 
-  /* ─── Dark Theme (Default) ─────────────────────────────────────────────── */
+  /* ─── Light Theme (Default) ─────────────────────────────────────────────── */
   :root {
-    /* Surface colors (dark) */
-    --surface:   8 8 16;
-    --surface-1: 13 13 26;
-    --surface-2: 19 19 37;
-    --surface-3: 26 26 48;
-    --surface-4: 34 34 60;
+    color-scheme: light;
 
-    /* Text colors */
-    --foreground:  226 232 240;
-    --muted-fg:    148 163 184;
+    /* New OpenClaw design tokens */
+    --bg:             #F2F2F3;
+    --surface:        #FFFFFF;
+    --surface-muted:  #F6F6F7;
+    --surface-strong: #EBEBEC;
+    --border:         #DCDCDE;
+    --border-strong:  #C8C8CB;
+    --text:           #111112;
+    --text-muted:     #6B6B74;
+    --text-quiet:     #9898A0;
+    --accent:         #111112;
+    --accent-blue:    #2563EB;
+    --accent-soft:    rgba(17, 17, 18, 0.05);
+    --success:        #15803D;
+    --warning:        #B45309;
+    --danger:         #B91C1C;
+    --info:           #1D4ED8;
+    --shadow-card:    0 1px 2px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.05);
+    --shadow-panel:   0 2px 4px rgba(0,0,0,0.07), 0 4px 12px rgba(0,0,0,0.05);
+    --shadow-lifted:  0 4px 8px rgba(0,0,0,0.08), 0 8px 24px rgba(0,0,0,0.06);
 
-    /* Border */
-    --border-rgb:          255 255 255;
-    --border-opacity:      0.07;
-    --border-hover-opacity:0.13;
-
-    /* Card / Glass backgrounds */
-    --card-rgb:     255 255 255;
-    --card-opacity: 0.03;
-
-    /* Muted background */
-    --muted-rgb:     255 255 255;
+    /* Legacy Tailwind-compatible RGB triplets */
+    --surface-rgb:   255 255 255;
+    --surface-1:     255 255 255;
+    --surface-2:     244 244 245;
+    --surface-3:     228 228 231;
+    --surface-4:     209 209 214;
+    --foreground:    9 9 11;
+    --muted-fg:      113 113 122;
+    --border-rgb:    9 9 11;
+    --border-opacity:       0.12;
+    --border-hover-opacity: 0.22;
+    --card-rgb:      255 255 255;
+    --card-opacity:  1;
+    --muted-rgb:     9 9 11;
     --muted-opacity: 0.05;
+    --input-rgb:     9 9 11;
+    --input-opacity: 0.06;
 
-    /* Input background */
-    --input-rgb:     255 255 255;
-    --input-opacity: 0.07;
+    /* Shadow aliases */
+    --shadow-glass:      var(--shadow-card);
+    --shadow-glass-sm:   0 1px 2px rgba(0,0,0,0.04);
+    --shadow-card-hover: var(--shadow-panel);
+    --shadow-modal:      0 16px 48px rgba(0,0,0,0.15);
 
-    /* Shadows */
-    --shadow-glass:    0 4px 24px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05);
-    --shadow-glass-sm: 0 2px 12px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.04);
-    --shadow-card:     0 2px 16px rgba(0,0,0,0.6);
-    --shadow-modal:    0 32px 80px rgba(0,0,0,0.8);
+    /* Legacy RGB triplets for Tailwind color utilities */
 
-    /* Glass panel */
-    --glass-panel-bg:     rgba(255, 255, 255, 0.03);
-    --glass-panel-border: rgba(255, 255, 255, 0.07);
-    --glass-elevated-bg:  rgba(19, 19, 37, 0.8);
-    --glass-subtle-bg:    rgba(255, 255, 255, 0.015);
-    --glass-bordered-bg:  rgba(255, 255, 255, 0.03);
-
-    /* Divider */
-    --divide-color: rgba(255, 255, 255, 0.04);
+    /* Panel classes */
+    --glass-panel-bg:     rgba(255, 255, 255, 1);
+    --glass-panel-border: rgba(228, 228, 231, 1);
+    --glass-elevated-bg:  rgba(255, 255, 255, 1);
+    --glass-subtle-bg:    rgba(244, 244, 245, 1);
+    --glass-bordered-bg:  rgba(255, 255, 255, 1);
+    --divide-color:       rgba(228, 228, 231, 1);
 
     /* Scrollbar */
-    --scrollbar-thumb: rgba(255, 255, 255, 0.10);
+    --scrollbar-thumb:       rgba(0, 0, 0, 0.12);
+    --scrollbar-thumb-hover: rgba(0, 0, 0, 0.22);
+  }
+
+  /* ─── Dark Theme ─────────────────────────────────────────────────────────── */
+  .dark {
+    color-scheme: dark;
+
+    --bg:             #09090B;
+    --surface:        #111113;
+    --surface-muted:  #1C1C1F;
+    --surface-strong: #28282C;
+    --border:         #28282C;
+    --border-strong:  #3F3F46;
+    --text:           #FAFAFA;
+    --text-muted:     #A1A1AA;
+    --text-quiet:     #71717A;
+    --accent:         #FAFAFA;
+    --accent-soft:    rgba(250, 250, 250, 0.06);
+    --shadow-card:    0 1px 2px rgba(0,0,0,0.3);
+    --shadow-panel:   0 1px 3px rgba(0,0,0,0.4);
+
+    /* Legacy Tailwind-compatible RGB triplets */
+    --surface-rgb:   17 17 19;
+    --surface-1:     17 17 19;
+    --surface-2:     28 28 31;
+    --surface-3:     40 40 44;
+    --surface-4:     63 63 70;
+    --foreground:    250 250 250;
+    --muted-fg:      161 161 170;
+    --border-rgb:    250 250 250;
+    --border-opacity:       0.07;
+    --border-hover-opacity: 0.13;
+    --card-rgb:      250 250 250;
+    --card-opacity:  0.03;
+    --muted-rgb:     250 250 250;
+    --muted-opacity: 0.05;
+    --input-rgb:     250 250 250;
+    --input-opacity: 0.07;
+
+    --shadow-lifted:     0 4px 16px rgba(0,0,0,0.5), 0 8px 32px rgba(0,0,0,0.4);
+    --shadow-glass:      0 4px 24px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05);
+    --shadow-glass-sm:   0 2px 12px rgba(0,0,0,0.4);
+    --shadow-card-hover: 0 4px 24px rgba(0,0,0,0.7);
+    --shadow-modal:      0 32px 80px rgba(0,0,0,0.8);
+
+    --glass-panel-bg:     rgba(250, 250, 250, 0.03);
+    --glass-panel-border: rgba(250, 250, 250, 0.07);
+    --glass-elevated-bg:  rgba(17, 17, 19, 0.9);
+    --glass-subtle-bg:    rgba(250, 250, 250, 0.015);
+    --glass-bordered-bg:  rgba(250, 250, 250, 0.03);
+    --divide-color:       rgba(250, 250, 250, 0.06);
+
+    --scrollbar-thumb:       rgba(255, 255, 255, 0.10);
     --scrollbar-thumb-hover: rgba(255, 255, 255, 0.20);
   }
 
-  /* ─── Light Theme ──────────────────────────────────────────────────────── */
-  .light {
-    /* Surface colors (warm stone white) */
-    --surface:   248 247 255;
-    --surface-1: 241 240 252;
-    --surface-2: 233 232 248;
-    --surface-3: 223 221 242;
-    --surface-4: 210 208 234;
-
-    /* Text colors */
-    --foreground:  15 23 42;
-    --muted-fg:    100 116 139;
-
-    /* Border */
-    --border-rgb:          15 23 42;
-    --border-opacity:      0.08;
-    --border-hover-opacity:0.15;
-
-    /* Card / Glass */
-    --card-rgb:     255 255 255;
-    --card-opacity: 0.70;
-
-    /* Muted background */
-    --muted-rgb:     15 23 42;
-    --muted-opacity: 0.04;
-
-    /* Input background */
-    --input-rgb:     15 23 42;
-    --input-opacity: 0.06;
-
-    /* Shadows (softer in light mode) */
-    --shadow-glass:    0 2px 16px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.8);
-    --shadow-glass-sm: 0 1px 8px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.7);
-    --shadow-card:     0 1px 8px rgba(0,0,0,0.08);
-    --shadow-modal:    0 16px 48px rgba(0,0,0,0.2);
-
-    /* Glass panel */
-    --glass-panel-bg:     rgba(255, 255, 255, 0.72);
-    --glass-panel-border: rgba(15, 23, 42, 0.08);
-    --glass-elevated-bg:  rgba(255, 255, 255, 0.88);
-    --glass-subtle-bg:    rgba(255, 255, 255, 0.50);
-    --glass-bordered-bg:  rgba(255, 255, 255, 0.80);
-
-    /* Divider */
-    --divide-color: rgba(15, 23, 42, 0.06);
-
-    /* Scrollbar */
-    --scrollbar-thumb: rgba(15, 23, 42, 0.12);
-    --scrollbar-thumb-hover: rgba(15, 23, 42, 0.22);
-  }
-
   body {
-    @apply bg-surface text-foreground font-sans;
+    background-color: var(--bg);
+    color: var(--text);
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   }
 
-  /* ─── Scrollbar ──────────────────────────────────────────────────────────── */
+  /* ─── Scrollbar ─────────────────────────────────────────────────────────── */
   ::-webkit-scrollbar { width: 4px; height: 4px; }
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb {
@@ -123,96 +139,102 @@
     background-color: var(--scrollbar-thumb-hover);
   }
 
-  /* ─── Glass Panels (Theme-Aware) ─────────────────────────────────────────── */
+  /* ─── Card / Panel classes ──────────────────────────────────────────────── */
   .glass-panel {
-    background-color: var(--glass-panel-bg);
-    border-color: var(--glass-panel-border);
-    @apply backdrop-blur-glass rounded-panel border shadow-glass;
+    background-color: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    box-shadow: var(--shadow-card);
   }
 
   .glass-panel-elevated {
-    background-color: var(--glass-elevated-bg);
-    border-color: var(--glass-panel-border);
-    @apply backdrop-blur-glass rounded-panel border shadow-glass;
+    background-color: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    box-shadow: var(--shadow-card);
   }
 
   .glass-panel-subtle {
-    background-color: var(--glass-subtle-bg);
-    border-color: var(--glass-panel-border);
-    @apply backdrop-blur-glass rounded-panel border;
+    background-color: var(--surface-muted);
+    border: 1px solid var(--border);
+    border-radius: 12px;
   }
 
-  /* ─── Dividers ────────────────────────────────────────────────────────────── */
-  .divide-themed > * + * {
-    border-top: 1px solid var(--divide-color);
-  }
-
-  /* ─── Glass Utility ──────────────────────────────────────────────────────── */
   .glass {
-    background-color: var(--glass-panel-bg);
-    border-color: var(--glass-panel-border);
-    @apply backdrop-blur-glass border rounded-panel;
+    background-color: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
   }
 
-  /* ─── Gradient text ──────────────────────────────────────────────────────── */
+  /* ─── Dividers ──────────────────────────────────────────────────────────── */
+  .divide-themed > * + * {
+    border-top: 1px solid var(--border);
+  }
+
+  /* ─── Gradient text ─────────────────────────────────────────────────────── */
   .text-gradient {
-    @apply bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent;
+    @apply bg-gradient-to-r from-blue-600 to-blue-400 bg-clip-text text-transparent;
   }
 
-  /* ─── Shimmer ─────────────────────────────────────────────────────────────── */
+  /* ─── Shimmer ───────────────────────────────────────────────────────────── */
   .shimmer {
-    background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.05) 50%, transparent 100%);
+    background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.4) 50%, transparent 100%);
     background-size: 200% 100%;
     @apply animate-shimmer;
   }
 
-  /* ─── Light mode text overrides (for hard-coded text-white in components) ─── */
-  .light .text-white { color: rgb(var(--foreground)) !important; }
-  .light .text-white\/80 { color: rgba(15, 23, 42, 0.8) !important; }
-  .light .text-white\/70 { color: rgba(15, 23, 42, 0.7) !important; }
-  .light .text-white\/90 { color: rgba(15, 23, 42, 0.9) !important; }
-
-  /* ─── Light mode border overrides ─────────────────────────────────────────── */
-  .light .border-white\/\[0\.07\] { border-color: rgba(15,23,42,0.08) !important; }
-  .light .border-white\/\[0\.04\] { border-color: rgba(15,23,42,0.05) !important; }
-  .light .border-white\/\[0\.06\] { border-color: rgba(15,23,42,0.07) !important; }
-  .light .border-white\/\[0\.10\] { border-color: rgba(15,23,42,0.10) !important; }
-  .light .border-white\/\[0\.12\] { border-color: rgba(15,23,42,0.12) !important; }
-  .light .border-white\/10 { border-color: rgba(15,23,42,0.10) !important; }
-  .light .border-white\/\[0\.05\] { border-color: rgba(15,23,42,0.06) !important; }
-
-  /* ─── Light mode background overrides (for hard-coded bg-white/opacity classes) */
-  .light .bg-white\/\[0\.03\] { background-color: rgba(255,255,255,0.72) !important; }
-  .light .bg-white\/\[0\.04\] { background-color: rgba(255,255,255,0.60) !important; }
-  .light .bg-white\/\[0\.05\] { background-color: rgba(255,255,255,0.50) !important; }
-  .light .bg-white\/\[0\.06\] { background-color: rgba(255,255,255,0.55) !important; }
-  .light .bg-white\/\[0\.02\] { background-color: rgba(255,255,255,0.40) !important; }
-
-  /* ─── Light mode: hover states ───────────────────────────────────────────── */
-  .light .hover\:bg-white\/\[0\.05\]:hover { background-color: rgba(0,0,0,0.04) !important; }
-  .light .hover\:bg-white\/\[0\.06\]:hover { background-color: rgba(0,0,0,0.05) !important; }
-  .light .hover\:bg-white\/\[0\.08\]:hover { background-color: rgba(0,0,0,0.06) !important; }
-  .light .hover\:bg-white\/\[0\.02\]:hover { background-color: rgba(0,0,0,0.03) !important; }
-  .light .hover\:border-white\/\[0\.2\]:hover { border-color: rgba(0,0,0,0.18) !important; }
-  .light .hover\:border-white\/\[0\.12\]:hover { border-color: rgba(0,0,0,0.14) !important; }
-  .light .hover\:border-white\/\[0\.15\]:hover { border-color: rgba(0,0,0,0.16) !important; }
-
-  /* ─── Light mode: divide colors ──────────────────────────────────────────── */
-  .light .divide-white\/\[0\.04\] > * + * { border-color: rgba(15,23,42,0.06) !important; }
-  .light .divide-white\/\[0\.03\] > * + * { border-color: rgba(15,23,42,0.05) !important; }
-
-  /* ─── Light mode surface overrides ──────────────────────────────────────── */
-  .light .bg-surface-2\/60 { background-color: rgba(233,232,248,0.70) !important; }
-  .light .bg-surface-3 { background-color: rgb(223, 221, 242) !important; }
-  .light .bg-surface-2\/80 { background-color: rgba(233,232,248,0.85) !important; }
-
-  /* ─── Input fields in light mode ────────────────────────────────────────── */
-  .light input, .light textarea, .light select {
-    color: rgb(var(--foreground));
-    background-color: rgba(255,255,255,0.8);
-    border-color: rgba(15,23,42,0.12);
+  /* ─── Page fade-in ──────────────────────────────────────────────────────── */
+  .page-fade {
+    animation: fade-in 0.2s ease-out;
   }
-  .light input::placeholder, .light textarea::placeholder {
-    color: rgb(var(--muted-fg));
+
+  /* ─── Input focus rings ─────────────────────────────────────────────────── */
+  input:focus-visible,
+  textarea:focus-visible,
+  select:focus-visible {
+    outline: none;
+    border-color: var(--accent-blue, #2563EB) !important;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15) !important;
+  }
+
+  /* ─── Dark mode sidebar ─────────────────────────────────────────────────── */
+  .dark [data-sidebar="true"] {
+    background: var(--surface) !important;
+  }
+
+  /* ─── Sidebar nav item states ───────────────────────────────────────────── */
+  .nav-active {
+    background: #EEF2FF;
+    color: #3730A3;
+  }
+  .nav-inactive {
+    color: var(--text-muted);
+  }
+  .nav-inactive:hover {
+    background: #F5F5F6;
+  }
+  .nav-accent-bar {
+    background: #4F46E5;
+  }
+  .nav-icon-active {
+    color: #4F46E5;
+  }
+  .nav-icon-inactive {
+    color: var(--text-quiet);
+  }
+
+  /* Dark mode nav overrides */
+  .dark .nav-active {
+    background: var(--accent-soft);
+    color: var(--text);
+  }
+  .dark .nav-inactive:hover {
+    background: var(--surface-muted);
+  }
+  .dark .nav-accent-bar {
+    background: var(--text);
+  }
+  .dark .nav-icon-active {
+    color: var(--text);
   }
 }

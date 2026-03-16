@@ -36,7 +36,7 @@ const statusBorderMap: Record<NonNullable<HealthCardProps['status']>, string> = 
   ok:      'border-status-online/20',
   warn:    'border-status-warning/20',
   error:   'border-status-error/20',
-  neutral: 'border-white/[0.07]',
+  neutral: 'border-[var(--border)]',
 }
 
 const statusValueMap: Record<NonNullable<HealthCardProps['status']>, string> = {
@@ -68,7 +68,7 @@ function HealthCard({
       transition={{ duration: 0.3, delay }}
     >
       <GlassPanel
-        className={`relative overflow-hidden border ${borderClass} hover:border-white/[0.14] transition-all`}
+        className={`relative overflow-hidden border ${borderClass} hover:border-[var(--border-strong)] transition-all`}
       >
         {/* Subtle background glow for active/ok cards */}
         {status === 'ok' && (
@@ -77,7 +77,7 @@ function HealthCard({
 
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-white/[0.05] border border-white/[0.08] flex items-center justify-center text-muted-foreground">
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center text-muted-foreground" style={{ background: 'var(--surface-muted)', border: '1px solid var(--border)' }}>
               {icon}
             </div>
             <div>

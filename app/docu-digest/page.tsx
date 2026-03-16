@@ -20,7 +20,7 @@ const itemVariants = {
 
 export default function DocuDigestPage() {
   return (
-    <div className="flex flex-col h-full min-h-0">
+    <div className="flex flex-col h-full min-h-0" style={{ background: 'var(--bg)' }}>
       <TopBar title="Docu Digest" subtitle="Intelligence ingestion workspace" />
 
       <div className="flex-1 overflow-hidden p-6">

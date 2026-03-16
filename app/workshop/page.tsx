@@ -15,7 +15,7 @@ const KanbanBoard = dynamic(
 
 export default function WorkshopPage() {
   return (
-    <div className="flex flex-col h-full min-h-0">
+    <div className="flex flex-col h-full min-h-0" style={{ background: 'var(--bg)' }}>
       <TopBar title="Workshop" subtitle="Task orchestration &amp; planning" />
       <div className="flex-1 overflow-hidden p-6">
         <KanbanBoard />

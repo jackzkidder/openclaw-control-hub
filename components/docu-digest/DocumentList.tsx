@@ -5,9 +5,10 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
 import { GlassPanel } from '@/components/primitives/GlassPanel';
 import { GlowButton } from '@/components/primitives/GlowButton';
+import { BlurModal } from '@/components/primitives/BlurModal';
 import { PulseIndicator } from '@/components/primitives/PulseIndicator';
 import { formatFileSize, formatRelativeTime } from '@/lib/utils/formatters';
-import type { Document } from '@/lib/openclaw/types';
+import type { Document, Task } from '@/lib/openclaw/types';
 
 // ─── API helpers ─────────────────────────────────────────────────────────────
 
@@ -157,7 +158,7 @@ function DocumentItem({ doc, index, onDelete, onAttach, isDeletingId }: Document
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, x: -20, height: 0 }}
       transition={{ duration: 0.22, delay: index * 0.04 }}
-      className="flex items-start gap-3 px-4 py-3 hover:bg-white/[0.02] transition-colors"
+      className="flex items-start gap-3 px-4 py-3 hover:bg-[var(--surface-muted)] transition-colors"
     >
       {/* File icon */}
       <FileIcon mimeType={doc.mimeType ?? ''} />
@@ -166,23 +167,23 @@ function DocumentItem({ doc, index, onDelete, onAttach, isDeletingId }: Document
       <div className="flex-1 min-w-0">
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0">
-            <p className="text-sm font-medium text-white truncate">{doc.name}</p>
+            <p className="text-sm font-medium truncate" style={{ color: 'var(--text)' }}>{doc.name}</p>
             <div className="flex items-center gap-2 mt-0.5 flex-wrap">
-              <span className="text-xs text-muted-foreground">{formatFileSize(doc.size ?? 0)}</span>
-              {doc.createdAt && (
+              <span className="text-xs text-muted-foreground">{formatFileSize(doc.sizeBytes ?? 0)}</span>
+              {doc.uploadedAt && (
                 <>
                   <span className="text-muted-foreground/40 text-xs">·</span>
-                  <span className="text-xs text-muted-foreground">{formatRelativeTime(doc.createdAt)}</span>
+                  <span className="text-xs text-muted-foreground">{formatRelativeTime(doc.uploadedAt)}</span>
                 </>
               )}
-              {typeof doc.linkedTasksCount === 'number' && doc.linkedTasksCount > 0 && (
+              {doc.linkedTaskIds.length > 0 && (
                 <>
                   <span className="text-muted-foreground/40 text-xs">·</span>
                   <span className="inline-flex items-center gap-1 text-xs text-secondary">
                     <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
                     </svg>
-                    {doc.linkedTasksCount} task{doc.linkedTasksCount !== 1 ? 's' : ''}
+                    {doc.linkedTaskIds.length} task{doc.linkedTaskIds.length !== 1 ? 's' : ''}
                   </span>
                 </>
               )}
@@ -231,6 +232,108 @@ function DocumentItem({ doc, index, onDelete, onAttach, isDeletingId }: Document
   );
 }
 
+// ─── Attach Task Modal ────────────────────────────────────────────────────────
+
+async function fetchTasks(): Promise<Task[]> {
+  const res = await fetch('/api/tasks');
+  if (!res.ok) throw new Error('Failed to fetch tasks');
+  return res.json();
+}
+
+function AttachTaskModal({
+  documentId,
+  onClose,
+  onAttached,
+}: {
+  documentId: string | null;
+  onClose: () => void;
+  onAttached: () => void;
+}) {
+  const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
+  const [attaching, setAttaching] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const { data: tasks = [], isLoading } = useQuery<Task[]>({
+    queryKey: ['tasks'],
+    queryFn: fetchTasks,
+    enabled: !!documentId,
+  });
+
+  const activeTasks = tasks.filter((t) => t.status !== 'done' && t.status !== 'cancelled');
+
+  async function handleConfirm() {
+    if (!documentId || !selectedTaskId) return;
+    setAttaching(true);
+    setError(null);
+    try {
+      const res = await fetch('/api/tasks/attach-document', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ documentId, taskId: selectedTaskId }),
+      });
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error((body as { error?: string }).error ?? `HTTP ${res.status}`);
+      }
+      onAttached();
+      onClose();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to attach');
+    } finally {
+      setAttaching(false);
+    }
+  }
+
+  return (
+    <BlurModal open={!!documentId} onClose={onClose} title="Attach to Task">
+      <div className="space-y-3">
+        <p className="text-xs text-muted-foreground">Select a task to link this document to.</p>
+
+        {isLoading ? (
+          <p className="text-sm text-muted-foreground animate-pulse py-4 text-center">Loading tasks…</p>
+        ) : activeTasks.length === 0 ? (
+          <p className="text-sm text-muted-foreground py-4 text-center">No active tasks found.</p>
+        ) : (
+          <div className="max-h-64 overflow-y-auto space-y-1.5">
+            {activeTasks.map((task) => (
+              <button
+                key={task.id}
+                type="button"
+                onClick={() => setSelectedTaskId(task.id)}
+                className={`w-full text-left px-3 py-2.5 rounded-lg border transition-colors ${
+                  selectedTaskId === task.id
+                    ? 'bg-primary/10 border-primary/30 text-foreground'
+                    : 'bg-[var(--surface-muted)] border-[var(--border)] text-[var(--text-muted)] hover:bg-[var(--surface-strong)] hover:text-[var(--text)]'
+                }`}
+              >
+                <p className="text-sm font-medium truncate">{task.title}</p>
+                <p className="text-xs mt-0.5 opacity-60 capitalize">{task.status.replace('_', ' ')} · {task.priority}</p>
+              </button>
+            ))}
+          </div>
+        )}
+
+        {error && (
+          <p className="text-xs text-status-error">{error}</p>
+        )}
+
+        <div className="flex items-center justify-end gap-2 pt-1 border-t border-[var(--border)]">
+          <GlowButton variant="ghost" size="sm" onClick={onClose}>Cancel</GlowButton>
+          <GlowButton
+            variant="primary"
+            size="sm"
+            disabled={!selectedTaskId || attaching}
+            loading={attaching}
+            onClick={handleConfirm}
+          >
+            Attach
+          </GlowButton>
+        </div>
+      </div>
+    </BlurModal>
+  );
+}
+
 // ─── Empty state ──────────────────────────────────────────────────────────────
 
 function EmptyState() {
@@ -240,7 +343,7 @@ function EmptyState() {
       animate={{ opacity: 1, y: 0 }}
       className="flex flex-col items-center justify-center py-14 text-center"
     >
-      <div className="w-14 h-14 rounded-full bg-white/[0.03] border border-white/[0.07] flex items-center justify-center mb-4">
+      <div className="w-14 h-14 rounded-full flex items-center justify-center mb-4" style={{ background: 'var(--surface-muted)', border: '1px solid var(--border)' }}>
         <svg className="w-6 h-6 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
         </svg>
@@ -256,6 +359,7 @@ function EmptyState() {
 export function DocumentList() {
   const queryClient = useQueryClient();
   const [isDeletingId, setIsDeletingId] = useState<string | null>(null);
+  const [attachingDocId, setAttachingDocId] = useState<string | null>(null);
 
   const { data: documents = [], isLoading, isError } = useQuery<Document[], Error>({
     queryKey: ['documents'],
@@ -280,11 +384,8 @@ export function DocumentList() {
 
   const handleDelete = (id: string) => deleteMutation.mutate(id);
 
-  // Attach: in a real app this would open a task-picker modal;
-  // for now we optimistically call the API with a placeholder.
   const handleAttach = (id: string) => {
-    // TODO: open task selection modal, then call attachToTask(id, selectedTaskId)
-    console.log('Attach document', id);
+    setAttachingDocId(id);
   };
 
   const processingCount = documents.filter(
@@ -294,14 +395,14 @@ export function DocumentList() {
   return (
     <GlassPanel className="overflow-hidden">
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.07]">
+      <div className="flex items-center justify-between px-4 py-3" style={{ borderBottom: '1px solid var(--border)' }}>
         <div className="flex items-center gap-2">
           <svg className="w-4 h-4 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
           </svg>
-          <h2 className="text-sm font-semibold text-white">Document Library</h2>
+          <h2 className="text-sm font-semibold" style={{ color: 'var(--text)' }}>Document Library</h2>
           {!isLoading && (
-            <span className="px-1.5 py-0.5 rounded-full text-xs bg-white/[0.05] text-muted-foreground border border-white/[0.07]">
+            <span className="px-1.5 py-0.5 rounded-full text-xs" style={{ background: 'var(--surface-muted)', color: 'var(--text-muted)', border: '1px solid var(--border)' }}>
               {documents.length}
             </span>
           )}
@@ -329,13 +430,13 @@ export function DocumentList() {
 
       {/* List */}
       {isLoading ? (
-        <div className="divide-y divide-white/[0.04]">
+        <div className="divide-y divide-[var(--border)]">
           {Array.from({ length: 3 }).map((_, i) => (
             <div key={i} className="px-4 py-3 animate-pulse flex items-center gap-3">
-              <div className="w-9 h-11 bg-white/[0.05] rounded-card" />
+              <div className="w-9 h-11 rounded-card" style={{ background: 'var(--surface-strong)' }} />
               <div className="flex-1 space-y-2">
-                <div className="h-3.5 w-48 bg-white/[0.05] rounded" />
-                <div className="h-3 w-24 bg-white/[0.05] rounded" />
+                <div className="h-3.5 w-48 rounded" style={{ background: 'var(--surface-strong)' }} />
+                <div className="h-3 w-24 rounded" style={{ background: 'var(--surface-strong)' }} />
               </div>
             </div>
           ))}
@@ -343,7 +444,7 @@ export function DocumentList() {
       ) : documents.length === 0 ? (
         <EmptyState />
       ) : (
-        <div className="divide-y divide-white/[0.04]">
+        <div className="divide-y divide-[var(--border)]">
           <AnimatePresence initial={false}>
             {documents.map((doc, index) => (
               <DocumentItem
@@ -358,6 +459,12 @@ export function DocumentList() {
           </AnimatePresence>
         </div>
       )}
+
+      <AttachTaskModal
+        documentId={attachingDocId}
+        onClose={() => setAttachingDocId(null)}
+        onAttached={() => queryClient.invalidateQueries({ queryKey: ['documents'] })}
+      />
     </GlassPanel>
   );
 }

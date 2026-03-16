@@ -2,9 +2,7 @@
 
 import { motion } from 'framer-motion'
 import { Bot, Activity, Clock } from 'lucide-react'
-import { GlassPanel } from '@/components/primitives/GlassPanel'
 import { PulseIndicator } from '@/components/primitives/PulseIndicator'
-import { cn } from '@/lib/utils/cn'
 import { formatRelativeTime, formatTokenCount } from '@/lib/utils/formatters'
 import type { Agent } from '@/lib/openclaw/types'
 
@@ -32,42 +30,59 @@ export function AgentCard({ agent, onClick, delay = 0 }: AgentCardProps) {
       transition={{ duration: 0.35, delay }}
       whileHover={{ y: -2 }}
     >
-      <GlassPanel
-        className={cn(
-          'cursor-pointer hover:border-white/[0.15] transition-all',
-          agent.status === 'running' && 'border-primary/20 shadow-glow',
-          agent.status === 'error' && 'border-status-error/20'
-        )}
+      <div
+        className="rounded-xl p-5 cursor-pointer transition-all duration-150"
+        style={{
+          background: 'var(--surface)',
+          border: agent.status === 'running'
+            ? '1px solid rgba(37,99,235,0.25)'
+            : agent.status === 'error'
+            ? '1px solid rgba(220,38,38,0.2)'
+            : '1px solid var(--border)',
+          boxShadow: 'var(--shadow-card)',
+        }}
+        onMouseEnter={(e) => {
+          (e.currentTarget as HTMLDivElement).style.boxShadow = 'var(--shadow-panel)'
+        }}
+        onMouseLeave={(e) => {
+          (e.currentTarget as HTMLDivElement).style.boxShadow = 'var(--shadow-card)'
+        }}
         onClick={onClick}
       >
         <div className="flex items-start justify-between mb-3">
           <div className="flex items-center gap-3">
-            <div className={cn(
-              'w-10 h-10 rounded-xl flex items-center justify-center',
-              'bg-white/[0.05] border border-white/[0.08]'
-            )}>
-              <Bot size={18} className={agent.status === 'running' ? 'text-primary' : 'text-muted-foreground'} />
+            <div
+              className="w-10 h-10 rounded-xl flex items-center justify-center"
+              style={{ background: 'var(--surface-muted)', border: '1px solid var(--border)' }}
+            >
+              <Bot
+                size={18}
+                style={{ color: agent.status === 'running' ? 'var(--info)' : 'var(--text-quiet)' }}
+              />
             </div>
             <div>
-              <p className="font-semibold text-sm text-foreground">{agent.name}</p>
-              <p className="text-xs text-muted-foreground font-mono">{agent.model}</p>
+              <p className="font-semibold text-sm" style={{ color: 'var(--text)' }}>{agent.name}</p>
+              <p className="text-xs font-mono" style={{ color: 'var(--text-muted)' }}>{agent.model}</p>
             </div>
           </div>
           <PulseIndicator color={pulseColor} size="sm" pulse={agent.status === 'running'} />
         </div>
 
         {agent.description && (
-          <p className="text-xs text-muted-foreground mb-3 line-clamp-2">{agent.description}</p>
+          <p className="text-xs mb-3 line-clamp-2" style={{ color: 'var(--text-muted)' }}>{agent.description}</p>
         )}
 
         {agent.currentTask && (
-          <div className="flex items-center gap-2 mb-3 px-2 py-1.5 rounded-lg bg-primary/[0.07] border border-primary/20">
-            <Activity size={11} className="text-primary flex-shrink-0" />
-            <p className="text-xs text-primary line-clamp-1">{agent.currentTask}</p>
+          <div
+            className="flex items-center gap-2 mb-3 px-2 py-1.5 rounded-lg"
+            style={{ background: 'rgba(37,99,235,0.06)', border: '1px solid rgba(37,99,235,0.15)' }}
+          >
+            <Activity size={11} className="flex-shrink-0" style={{ color: 'var(--info)' }} />
+            <p className="text-xs line-clamp-1" style={{ color: 'var(--info)' }}>{agent.currentTask}</p>
           </div>
         )}
 
-        <div className="flex items-center justify-between text-xs text-muted-foreground">
+        <div className="flex items-center justify-between text-xs" style={{ color: 'var(--text-quiet)' }}>
           <div className="flex items-center gap-1">
             <Clock size={10} />
             <span>{formatRelativeTime(agent.lastActiveAt)}</span>
@@ -76,7 +91,7 @@ export function AgentCard({ agent, onClick, delay = 0 }: AgentCardProps) {
             <span>{formatTokenCount(agent.tokensUsed.inputTokens + agent.tokensUsed.outputTokens)} tokens</span>
           )}
         </div>
-      </GlassPanel>
+      </div>
     </motion.div>
   )
 }

@@ -15,22 +15,22 @@ export function GlassPanel({
   glowColor = 'cyan',
   noPadding = false,
   children,
+  style,
   ...props
 }: GlassPanelProps) {
   return (
     <div
       className={cn(
-        'relative rounded-panel border transition-all duration-200 backdrop-blur-glass',
-        variant === 'default' && 'glass-panel shadow-glass',
-        variant === 'elevated' && 'glass-panel-elevated shadow-glass',
-        variant === 'subtle' && 'glass-panel-subtle',
-        variant === 'bordered' && 'glass-panel shadow-glass',
+        'relative rounded-xl border transition-all duration-200',
         !noPadding && 'p-5',
-        glow && glowColor === 'cyan' && 'shadow-glow',
-        glow && glowColor === 'violet' && 'shadow-glow-violet',
-        glow && glowColor === 'green' && 'shadow-glow-green',
         className
       )}
+      style={{
+        background: variant === 'subtle' ? 'var(--surface-muted)' : 'var(--surface)',
+        borderColor: 'var(--border)',
+        boxShadow: variant === 'elevated' ? 'var(--shadow-panel)' : 'var(--shadow-card)',
+        ...style,
+      }}
       {...props}
     >
       {children}

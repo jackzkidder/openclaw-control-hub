@@ -5,7 +5,7 @@ import type { WebhookRequest } from '@/lib/openclaw/types'
 
 export async function POST(req: NextRequest) {
   try {
-    const settings = getAllSettings()
+    const settings = await getAllSettings()
     if (!settings.webhookBaseUrl) {
       return NextResponse.json({ error: 'Webhook URL not configured' }, { status: 400 })
     }

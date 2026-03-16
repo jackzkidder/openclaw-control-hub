@@ -1,9 +1,7 @@
 'use client'
 
-import { motion } from 'framer-motion'
-import { ConnectionBadge } from '@/components/badges/ConnectionBadge'
-import { useConnectionStatus } from '@/hooks/useConnectionStatus'
-import { formatLatency } from '@/lib/utils/formatters'
+import { Sun, Moon } from 'lucide-react'
+import { useTheme } from 'next-themes'
 import { cn } from '@/lib/utils/cn'
 
 interface TopBarProps {
@@ -14,32 +12,52 @@ interface TopBarProps {
 }
 
 export function TopBar({ title, subtitle, actions, className }: TopBarProps) {
-  const { status, latencyMs } = useConnectionStatus()
+  const { theme, setTheme } = useTheme()
 
   return (
-    <motion.header
-      initial={{ opacity: 0, y: -8 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
-      className={cn(
-        'flex items-center justify-between',
-        'h-16 px-6 border-b border-white/[0.06]',
-        'bg-surface-1/60 backdrop-blur-glass flex-shrink-0',
-        className
-      )}
+    <header
+      className={cn('flex items-center justify-between h-14 px-8 flex-shrink-0', className)}
+      style={{
+        background: 'var(--surface)',
+        borderBottom: '1px solid var(--border)',
+      }}
     >
       <div>
-        <h1 className="text-lg font-semibold text-foreground leading-tight">{title}</h1>
-        {subtitle && <p className="text-xs text-muted-foreground mt-0.5">{subtitle}</p>}
+        <h1 className="text-lg font-semibold leading-tight" style={{ color: 'var(--text)' }}>
+          {title}
+        </h1>
+        {subtitle && (
+          <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>{subtitle}</p>
+        )}
       </div>
+
       <div className="flex items-center gap-3">
         {actions}
-        <ConnectionBadge
-          status={status}
-          latencyMs={latencyMs}
-          showLatency
-        />
+
+        <button
+          onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+          className="w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-150"
+          style={{ color: 'var(--text-muted)' }}
+          onMouseEnter={(e) => {
+            (e.currentTarget as HTMLButtonElement).style.background = 'var(--surface-muted)'
+            ;(e.currentTarget as HTMLButtonElement).style.color = 'var(--text)'
+          }}
+          onMouseLeave={(e) => {
+            (e.currentTarget as HTMLButtonElement).style.background = 'transparent'
+            ;(e.currentTarget as HTMLButtonElement).style.color = 'var(--text-muted)'
+          }}
+          title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+        >
+          {theme === 'dark' ? <Sun size={15} /> : <Moon size={15} />}
+        </button>
+
+        <div
+          className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0"
+          style={{ background: 'var(--surface-muted)' }}
+        >
+          <span className="text-xs font-medium" style={{ color: 'var(--text-muted)' }}>U</span>
+        </div>
       </div>
-    </motion.header>
+    </header>
   )
 }

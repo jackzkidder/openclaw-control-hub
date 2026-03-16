@@ -15,29 +15,42 @@ A modern operations dashboard for OpenClaw — monitor agents, tasks, automation
 
 ## Prerequisites
 
-- Node.js 22+
-- A running [OpenClaw](https://openclaw.ai) gateway
-- A [Turso](https://turso.tech) database (required for persistent storage on Vercel; SQLite works locally)
+- **Node.js 22+** — check your version with `node -v`. Download from [nodejs.org](https://nodejs.org) if needed.
+- **A running [OpenClaw](https://openclaw.ai) gateway** — the app is a dashboard for OpenClaw, so you'll need a gateway to connect to.
+- **Turso database** — only required when deploying to Vercel. For local use, a SQLite file is created automatically — no setup needed.
 
-## Quick Start
+## Installation
+
+### 1. Clone the repo
 
 ```bash
-# 1. Clone the repo
 git clone https://github.com/jackzkidder/openclaw-control-hub.git
-cd openclaw-control
+cd openclaw-control-hub
+```
 
-# 2. Configure environment
-cp .env.example .env.local
-# Edit .env.local — see Configuration section below
+### 2. Install dependencies
 
-# 3. Install dependencies
+```bash
 npm install
+```
 
-# 4. Run the dev server
+### 3. Set up your environment
+
+```bash
+cp .env.example .env.local
+```
+
+For **local use** you can leave `.env.local` as-is — the app will create a local SQLite database automatically and you can configure the gateway connection from the Settings page in the UI.
+
+For **Vercel deployment**, open `.env.local` and fill in your Turso database credentials (see [Configuration](#configuration) below).
+
+### 4. Start the app
+
+```bash
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000). On first load you'll see the Dashboard.
+Open [http://localhost:3000](http://localhost:3000) — you'll see the Dashboard. Head to **Settings** to connect your OpenClaw gateway.
 
 ## Connecting to Your OpenClaw Gateway
 

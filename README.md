@@ -70,7 +70,7 @@ Copy `.env.example` to `.env.local` and edit:
 
 You can also configure the gateway URL and API key directly in the **Settings** page — no restart required.
 
-**Local development:** The app falls back to a local SQLite database at `./data/mission-control.db` when Turso env vars are not set.
+**Local development:** The app falls back to a local SQLite database at `./data/openclaw-control.db` when Turso env vars are not set.
 
 ## Deploying to Vercel
 

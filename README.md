@@ -23,7 +23,7 @@ A modern operations dashboard for OpenClaw — monitor agents, tasks, automation
 
 ```bash
 # 1. Clone the repo
-git clone https://github.com/jackzkidder/openclaw-control.git
+git clone https://github.com/jackzkidder/openclaw-control-hub.git
 cd openclaw-control
 
 # 2. Configure environment

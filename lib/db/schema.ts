@@ -1,7 +1,7 @@
 // Each migration is an array of individual SQL statements
 // @libsql/client executes one statement per call
 
-export const SCHEMA_VERSION = 1
+export const SCHEMA_VERSION = 2
 
 export const migrations: Record<number, string[]> = {
   1: [
@@ -98,5 +98,44 @@ export const migrations: Record<number, string[]> = {
     )`,
     `CREATE INDEX IF NOT EXISTS idx_notes_entity ON notes(entity_type, entity_id)`,
     `INSERT OR IGNORE INTO schema_meta(key, value) VALUES ('version', '1')`,
+  ],
+  2: [
+    `CREATE TABLE IF NOT EXISTS task_history (
+      id         TEXT PRIMARY KEY,
+      task_id    TEXT NOT NULL,
+      field      TEXT NOT NULL,
+      old_value  TEXT,
+      new_value  TEXT,
+      changed_at TEXT NOT NULL DEFAULT (datetime('now'))
+    )`,
+    `CREATE INDEX IF NOT EXISTS idx_task_history_task ON task_history(task_id)`,
+    `CREATE TABLE IF NOT EXISTS cron_run_history (
+      id          TEXT PRIMARY KEY,
+      cron_job_id TEXT NOT NULL,
+      status      TEXT NOT NULL DEFAULT 'success',
+      started_at  TEXT NOT NULL DEFAULT (datetime('now')),
+      finished_at TEXT,
+      output      TEXT,
+      error       TEXT
+    )`,
+    `CREATE INDEX IF NOT EXISTS idx_cron_history_job ON cron_run_history(cron_job_id)`,
+    `CREATE TABLE IF NOT EXISTS alert_rules (
+      id         TEXT PRIMARY KEY,
+      name       TEXT NOT NULL,
+      metric     TEXT NOT NULL,
+      threshold  REAL NOT NULL,
+      enabled    INTEGER NOT NULL DEFAULT 1,
+      created_at TEXT NOT NULL DEFAULT (datetime('now'))
+    )`,
+    `CREATE TABLE IF NOT EXISTS notifications (
+      id         TEXT PRIMARY KEY,
+      type       TEXT NOT NULL,
+      title      TEXT NOT NULL,
+      message    TEXT NOT NULL,
+      read       INTEGER NOT NULL DEFAULT 0,
+      created_at TEXT NOT NULL DEFAULT (datetime('now'))
+    )`,
+    `CREATE INDEX IF NOT EXISTS idx_notifications_read ON notifications(read)`,
+    `INSERT OR REPLACE INTO schema_meta(key, value) VALUES ('version', '2')`,
   ],
 }

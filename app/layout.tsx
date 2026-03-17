@@ -3,6 +3,7 @@ import { DM_Sans } from 'next/font/google'
 import './globals.css'
 import { Providers } from '@/components/layout/Providers'
 import { Sidebar } from '@/components/layout/Sidebar'
+import { GatewayBanner } from '@/components/layout/GatewayBanner'
 
 const dmSans = DM_Sans({
   subsets: ['latin'],
@@ -27,6 +28,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <div className="flex h-screen overflow-hidden">
             <Sidebar />
             <main className="flex-1 flex flex-col min-w-0 overflow-hidden">
+              <GatewayBanner />
               {children}
             </main>
           </div>

@@ -5,11 +5,14 @@ import { AnimatePresence, motion } from 'framer-motion'
 import {
   Link2, Key, Webhook, Palette, Settings2,
   CheckCircle2, XCircle, Loader2, Eye, EyeOff, Save, RefreshCw, Moon, Sun,
+  Bell, Plus, Trash2,
 } from 'lucide-react'
 import { useTheme } from 'next-themes'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { TopBar } from '@/components/layout/TopBar'
 import { GlowButton } from '@/components/primitives/GlowButton'
 import { useSettings } from '@/hooks/useSettings'
+import type { AlertRule } from '@/lib/openclaw/types'
 
 type CheckStatus = 'idle' | 'loading' | 'ok' | 'error'
 
@@ -35,6 +38,132 @@ function StatusIcon({ status }: { status: CheckStatus }) {
   if (status === 'loading') return <Loader2 className="w-4 h-4 animate-spin" style={{ color: 'var(--text-quiet)' }} />
   if (status === 'ok')      return <CheckCircle2 className="w-4 h-4" style={{ color: 'var(--success)' }} />
   return <XCircle className="w-4 h-4" style={{ color: 'var(--danger)' }} />
+}
+
+// ─── Alert Rules ──────────────────────────────────────────────────────────────
+
+const METRIC_LABELS: Record<string, string> = {
+  daily_cost:    'Daily cost exceeds',
+  monthly_cost:  'Monthly cost exceeds',
+  agent_offline: 'Agent offline for (min)',
+  task_overdue:  'Task overdue by (days)',
+}
+
+function AlertRulesSection({
+  sectionStyle, inputStyle, labelStyle,
+}: { sectionStyle: React.CSSProperties; inputStyle: React.CSSProperties; labelStyle: React.CSSProperties }) {
+  const qc = useQueryClient()
+  const [newName, setNewName]         = useState('')
+  const [newMetric, setNewMetric]     = useState<AlertRule['metric']>('daily_cost')
+  const [newThreshold, setNewThreshold] = useState('')
+
+  const { data: rules = [] } = useQuery<AlertRule[]>({
+    queryKey: ['alert-rules'],
+    queryFn: async () => {
+      const res = await fetch('/api/alert-rules')
+      if (!res.ok) return []
+      return res.json()
+    },
+  })
+
+  const createRule = useMutation({
+    mutationFn: async () => {
+      await fetch('/api/alert-rules', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: newName, metric: newMetric, threshold: parseFloat(newThreshold) }),
+      })
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['alert-rules'] })
+      setNewName(''); setNewThreshold('')
+    },
+  })
+
+  const toggleRule = useMutation({
+    mutationFn: async ({ id, enabled }: { id: string; enabled: boolean }) => {
+      await fetch('/api/alert-rules', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, enabled }),
+      })
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['alert-rules'] }),
+  })
+
+  const deleteRule = useMutation({
+    mutationFn: async (id: string) => {
+      await fetch(`/api/alert-rules?id=${id}`, { method: 'DELETE' })
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['alert-rules'] }),
+  })
+
+  return (
+    <div style={sectionStyle}>
+      <div className="flex items-center gap-2 mb-5">
+        <Bell className="w-4 h-4" style={{ color: '#F59E0B' }} />
+        <h2 className="text-sm font-semibold" style={{ color: 'var(--text)' }}>Alert Rules</h2>
+      </div>
+
+      {rules.length === 0 ? (
+        <div className="text-center py-6 rounded-lg mb-4" style={{ border: '2px dashed var(--border)', background: 'var(--surface-muted)' }}>
+          <p className="text-xs" style={{ color: 'var(--text-muted)' }}>No alert rules yet</p>
+        </div>
+      ) : (
+        <div className="space-y-2 mb-4">
+          {rules.map((rule) => (
+            <div key={rule.id} className="flex items-center gap-3 p-3 rounded-lg" style={{ background: 'var(--surface-muted)', border: '1px solid var(--border)' }}>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium" style={{ color: 'var(--text)' }}>{rule.name}</p>
+                <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                  {METRIC_LABELS[rule.metric] ?? rule.metric} ${rule.threshold}
+                </p>
+              </div>
+              <button
+                onClick={() => toggleRule.mutate({ id: rule.id, enabled: !rule.enabled })}
+                className="text-[11px] px-2 py-1 rounded font-medium"
+                style={{ background: rule.enabled ? 'rgba(21,128,61,0.1)' : 'var(--surface)', color: rule.enabled ? 'var(--success)' : 'var(--text-quiet)', border: '1px solid var(--border)' }}
+              >
+                {rule.enabled ? 'On' : 'Off'}
+              </button>
+              <button onClick={() => deleteRule.mutate(rule.id)} style={{ color: 'var(--text-quiet)' }}>
+                <Trash2 size={14} />
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <div className="space-y-3 pt-3" style={{ borderTop: '1px solid var(--border)' }}>
+        <p className="text-xs font-medium" style={{ color: 'var(--text-muted)' }}>Add new rule</p>
+        <div className="grid grid-cols-2 gap-2">
+          <div>
+            <label style={labelStyle}>Rule Name</label>
+            <input type="text" value={newName} onChange={(e) => setNewName(e.target.value)} placeholder="e.g. High daily cost" style={inputStyle} />
+          </div>
+          <div>
+            <label style={labelStyle}>Threshold</label>
+            <input type="number" value={newThreshold} onChange={(e) => setNewThreshold(e.target.value)} placeholder="e.g. 5.00" style={inputStyle} />
+          </div>
+        </div>
+        <div>
+          <label style={labelStyle}>Metric</label>
+          <select value={newMetric} onChange={(e) => setNewMetric(e.target.value as AlertRule['metric'])} style={inputStyle}>
+            {Object.entries(METRIC_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+          </select>
+        </div>
+        <GlowButton
+          size="sm"
+          variant="primary"
+          icon={<Plus size={13} />}
+          disabled={!newName.trim() || !newThreshold || createRule.isPending}
+          onClick={() => createRule.mutate()}
+        >
+          Add Rule
+        </GlowButton>
+      </div>
+    </div>
+  )
 }
 
 export default function SettingsPage() {
@@ -441,6 +570,9 @@ export default function SettingsPage() {
                 </p>
               </div>
             </div>
+
+            {/* Alert Rules */}
+            <AlertRulesSection sectionStyle={sectionStyle} inputStyle={inputStyle} labelStyle={labelStyle} />
 
             {/* Save */}
             <div className="flex justify-end pb-8">

@@ -324,6 +324,64 @@ export interface WebhookResponse {
   latencyMs: number
 }
 
+// ─── Notes / Comments ─────────────────────────────────────────────────────────
+
+export interface Note {
+  id: string
+  entityType: string
+  entityId: string
+  content: string
+  createdAt: string
+  updatedAt: string
+}
+
+// ─── Task History ─────────────────────────────────────────────────────────────
+
+export interface TaskHistoryEntry {
+  id: string
+  taskId: string
+  field: string
+  oldValue: string | null
+  newValue: string | null
+  changedAt: string
+}
+
+// ─── Cron Run History ─────────────────────────────────────────────────────────
+
+export interface CronRunHistory {
+  id: string
+  cronJobId: string
+  status: 'success' | 'failure' | 'running'
+  startedAt: string
+  finishedAt: string | null
+  output: string | null
+  error: string | null
+}
+
+// ─── Alert Rules ──────────────────────────────────────────────────────────────
+
+export type AlertMetric = 'daily_cost' | 'monthly_cost' | 'agent_offline' | 'task_overdue'
+
+export interface AlertRule {
+  id: string
+  name: string
+  metric: AlertMetric
+  threshold: number
+  enabled: boolean
+  createdAt: string
+}
+
+// ─── Notifications ────────────────────────────────────────────────────────────
+
+export interface AppNotification {
+  id: string
+  type: 'alert' | 'info' | 'warning' | 'error'
+  title: string
+  message: string
+  read: boolean
+  createdAt: string
+}
+
 // ─── SSE Events (internal) ────────────────────────────────────────────────────
 
 export interface SSEMessage {

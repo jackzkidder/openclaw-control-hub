@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { DollarSign, Zap, TrendingUp, Calendar, AlertTriangle } from 'lucide-react'
+import { DollarSign, Zap, TrendingUp, Calendar, AlertTriangle, Download } from 'lucide-react'
 import { TopBar } from '@/components/layout/TopBar'
 import { AnimatedMetricCard } from '@/components/cards/AnimatedMetricCard'
 import { CostChart } from '@/components/charts/CostChart'
@@ -57,26 +57,36 @@ export default function UsagePage() {
         title="Usage & Cost"
         subtitle="Token usage and spending"
         actions={
-          <div
-            className="flex items-center gap-1 rounded-lg p-1"
-            style={{ background: 'var(--surface-muted)' }}
-          >
-            {DAYS_OPTIONS.map((d) => (
-              <button
-                key={d}
-                onClick={() => setDays(d)}
-                className="px-3 py-1 text-xs rounded-md font-medium transition-all duration-150"
-                style={days === d ? {
-                  background: 'var(--surface)',
-                  color: 'var(--text)',
-                  boxShadow: 'var(--shadow-card)',
-                } : {
-                  color: 'var(--text-muted)',
-                }}
-              >
-                {d}d
-              </button>
-            ))}
+          <div className="flex items-center gap-2">
+            <a
+              href={`/api/usage/export?days=${days}`}
+              download
+              className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg font-medium transition-colors"
+              style={{ background: 'var(--surface-muted)', color: 'var(--text-muted)', border: '1px solid var(--border)' }}
+            >
+              <Download size={12} /> Export CSV
+            </a>
+            <div
+              className="flex items-center gap-1 rounded-lg p-1"
+              style={{ background: 'var(--surface-muted)' }}
+            >
+              {DAYS_OPTIONS.map((d) => (
+                <button
+                  key={d}
+                  onClick={() => setDays(d)}
+                  className="px-3 py-1 text-xs rounded-md font-medium transition-all duration-150"
+                  style={days === d ? {
+                    background: 'var(--surface)',
+                    color: 'var(--text)',
+                    boxShadow: 'var(--shadow-card)',
+                  } : {
+                    color: 'var(--text-muted)',
+                  }}
+                >
+                  {d}d
+                </button>
+              ))}
+            </div>
           </div>
         }
       />
@@ -160,6 +170,52 @@ export default function UsagePage() {
               title="Usage Breakdown"
             />
           </div>
+
+          {/* Per-agent breakdown table */}
+          {data && Object.keys(data.byAgent).length > 0 && (
+            <div className="rounded-xl overflow-hidden" style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}>
+              <div className="px-5 py-4" style={{ borderBottom: '1px solid var(--border)' }}>
+                <h3 className="text-sm font-semibold" style={{ color: 'var(--text)' }}>Per-Agent Breakdown</h3>
+              </div>
+              <table className="w-full">
+                <thead>
+                  <tr style={{ background: 'var(--surface-muted)', borderBottom: '1px solid var(--border-strong)' }}>
+                    {['Agent', 'Input Tokens', 'Output Tokens', 'Total Tokens', 'Cost'].map((h) => (
+                      <th key={h} className="px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-wider" style={{ color: 'var(--text-quiet)' }}>{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {Object.entries(data.byAgent)
+                    .sort((a, b) => b[1].totalCost - a[1].totalCost)
+                    .map(([agentId, usage]) => {
+                      const pct = totalCost > 0 ? (usage.totalCost / totalCost) * 100 : 0
+                      return (
+                        <tr key={agentId} style={{ borderBottom: '1px solid var(--border)' }}
+                          onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = 'var(--surface-muted)' }}
+                          onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = 'transparent' }}>
+                          <td className="px-5 py-3">
+                            <div>
+                              <p className="text-sm font-medium" style={{ color: 'var(--text)' }}>{agentId}</p>
+                              <div className="flex items-center gap-1.5 mt-1">
+                                <div className="flex-1 h-1 rounded-full" style={{ background: 'var(--surface-muted)', maxWidth: '80px' }}>
+                                  <div className="h-full rounded-full" style={{ width: `${pct}%`, background: 'var(--accent-blue)' }} />
+                                </div>
+                                <span className="text-[10px]" style={{ color: 'var(--text-quiet)' }}>{pct.toFixed(1)}%</span>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="px-5 py-3 text-sm" style={{ color: 'var(--text)' }}>{usage.inputTokens.toLocaleString()}</td>
+                          <td className="px-5 py-3 text-sm" style={{ color: 'var(--text)' }}>{usage.outputTokens.toLocaleString()}</td>
+                          <td className="px-5 py-3 text-sm" style={{ color: 'var(--text)' }}>{(usage.inputTokens + usage.outputTokens).toLocaleString()}</td>
+                          <td className="px-5 py-3 text-sm font-medium" style={{ color: 'var(--text)' }}>{formatCost(usage.totalCost)}</td>
+                        </tr>
+                      )
+                    })}
+                </tbody>
+              </table>
+            </div>
+          )}
 
           {/* Error state */}
           {error && (

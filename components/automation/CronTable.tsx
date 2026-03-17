@@ -4,10 +4,79 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
 import cronstrue from 'cronstrue';
+import { History, X, CheckCircle2, XCircle } from 'lucide-react';
 import { GlassPanel } from '@/components/primitives/GlassPanel';
 import { GlowButton } from '@/components/primitives/GlowButton';
 import { formatRelativeTime, formatDateTime } from '@/lib/utils/formatters';
-import type { CronJob } from '@/lib/openclaw/types';
+import type { CronJob, CronRunHistory } from '@/lib/openclaw/types';
+
+// ─── Cron History Drawer ──────────────────────────────────────────────────────
+
+function CronHistoryDrawer({ job, onClose }: { job: CronJob; onClose: () => void }) {
+  const { data: runs = [], isLoading } = useQuery<CronRunHistory[]>({
+    queryKey: ['cron-history', job.id],
+    queryFn: async () => {
+      const res = await fetch(`/api/cron/history?cronJobId=${job.id}`)
+      if (!res.ok) return []
+      return res.json()
+    },
+  })
+
+  return (
+    <AnimatePresence>
+      <motion.div
+        className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm"
+        initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+        onClick={onClose}
+      />
+      <motion.aside
+        className="fixed top-0 right-0 z-50 h-full w-full max-w-sm flex flex-col"
+        style={{ background: 'var(--surface)', borderLeft: '1px solid var(--border)', boxShadow: 'var(--shadow-lifted)' }}
+        initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }}
+        transition={{ duration: 0.25, ease: [0.25, 0.46, 0.45, 0.94] }}
+      >
+        <div className="flex items-center justify-between px-5 py-4 flex-shrink-0" style={{ borderBottom: '1px solid var(--border)' }}>
+          <div>
+            <p className="text-sm font-semibold" style={{ color: 'var(--text)' }}>Run History</p>
+            <p className="text-xs" style={{ color: 'var(--text-muted)' }}>{job.name}</p>
+          </div>
+          <button onClick={onClose} style={{ color: 'var(--text-quiet)' }}>
+            <X size={16} />
+          </button>
+        </div>
+
+        <div className="flex-1 overflow-y-auto px-5 py-4">
+          {isLoading && <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Loading…</p>}
+          {!isLoading && runs.length === 0 && (
+            <div className="text-center py-10 rounded-lg" style={{ border: '2px dashed var(--border)', background: 'var(--surface-muted)' }}>
+              <History size={20} className="mx-auto mb-2" style={{ color: 'var(--text-quiet)' }} />
+              <p className="text-xs" style={{ color: 'var(--text-muted)' }}>No runs recorded yet</p>
+            </div>
+          )}
+          {runs.map((run) => (
+            <div key={run.id} className="flex items-start gap-3 py-3" style={{ borderBottom: '1px solid var(--border)' }}>
+              {run.status === 'success'
+                ? <CheckCircle2 size={15} className="flex-shrink-0 mt-0.5 text-emerald-600 dark:text-emerald-400" />
+                : <XCircle size={15} className="flex-shrink-0 mt-0.5 text-red-600 dark:text-red-400" />}
+              <div className="flex-1 min-w-0">
+                <p className="text-xs font-medium" style={{ color: 'var(--text)' }}>
+                  {run.status === 'success' ? 'Succeeded' : 'Failed'}
+                </p>
+                <p className="text-[10px]" style={{ color: 'var(--text-muted)' }}>{formatDateTime(run.startedAt)}</p>
+                {run.error && (
+                  <p className="text-[10px] mt-1 font-mono" style={{ color: 'var(--danger)' }}>{run.error}</p>
+                )}
+              </div>
+              <span className="text-[10px] flex-shrink-0" style={{ color: 'var(--text-quiet)' }}>
+                {formatRelativeTime(run.startedAt)}
+              </span>
+            </div>
+          ))}
+        </div>
+      </motion.aside>
+    </AnimatePresence>
+  )
+}
 
 async function fetchCronJobs(): Promise<CronJob[]> {
   const res = await fetch('/api/cron');
@@ -123,6 +192,7 @@ interface CronRowProps {
   onToggle: (id: string, enabled: boolean) => void;
   onRunNow: (id: string) => void;
   onDelete: (id: string) => void;
+  onHistory: (job: CronJob) => void;
   isTogglingId: string | null;
   isRunningId: string | null;
   isDeletingId: string | null;
@@ -134,6 +204,7 @@ function CronRow({
   onToggle,
   onRunNow,
   onDelete,
+  onHistory,
   isTogglingId,
   isRunningId,
   isDeletingId,
@@ -204,6 +275,17 @@ function CronRow({
       {/* Actions */}
       <td className="px-4 py-3">
         <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => onHistory(job)}
+            className="p-1.5 rounded-card transition-colors"
+            style={{ color: 'var(--text-quiet)' }}
+            title="View run history"
+            onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = 'var(--text)' }}
+            onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = 'var(--text-quiet)' }}
+          >
+            <History size={14} />
+          </button>
           <GlowButton
             size="sm"
             variant="secondary"
@@ -252,6 +334,7 @@ export function CronTable() {
   const [isTogglingId, setIsTogglingId] = useState<string | null>(null);
   const [isRunningId, setIsRunningId] = useState<string | null>(null);
   const [isDeletingId, setIsDeletingId] = useState<string | null>(null);
+  const [historyJob, setHistoryJob] = useState<CronJob | null>(null);
 
   const {
     data: jobs = [],
@@ -305,6 +388,8 @@ export function CronTable() {
   };
 
   return (
+    <>
+    {historyJob && <CronHistoryDrawer job={historyJob} onClose={() => setHistoryJob(null)} />}
     <GlassPanel className="overflow-hidden">
       <div className="flex items-center justify-between px-4 py-3" style={{ borderBottom: '1px solid var(--border)' }}>
         <div className="flex items-center gap-2">
@@ -375,6 +460,7 @@ export function CronTable() {
                     onToggle={handleToggle}
                     onRunNow={handleRunNow}
                     onDelete={handleDelete}
+                    onHistory={setHistoryJob}
                     isTogglingId={isTogglingId}
                     isRunningId={isRunningId}
                     isDeletingId={isDeletingId}
@@ -386,5 +472,6 @@ export function CronTable() {
         </div>
       )}
     </GlassPanel>
+    </>
   );
 }

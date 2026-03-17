@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   DndContext,
@@ -19,7 +19,8 @@ import {
   useSortable,
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { Plus, Kanban, ChevronDown } from 'lucide-react'
+import { Plus, Kanban, ChevronDown, CheckSquare, Trash2, MoveRight, X } from 'lucide-react'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import type { Task, TaskStatus, TaskPriority, CreateTaskInput } from '@/lib/openclaw/types'
 import { useTasks, useUpdateTask, useCreateTask } from '@/hooks/useTasks'
@@ -51,9 +52,12 @@ const COLUMNS: ColumnConfig[] = [
 interface SortableTaskItemProps {
   task: Task
   onSelect: (task: Task) => void
+  selected: boolean
+  selectMode: boolean
+  onToggleSelect: (id: string) => void
 }
 
-function SortableTaskItem({ task, onSelect }: SortableTaskItemProps) {
+function SortableTaskItem({ task, onSelect, selected, selectMode, onToggleSelect }: SortableTaskItemProps) {
   const {
     attributes,
     listeners,
@@ -70,9 +74,85 @@ function SortableTaskItem({ task, onSelect }: SortableTaskItemProps) {
   }
 
   return (
-    <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
-      <TaskCard task={task} onClick={() => onSelect(task)} isDragging={isDragging} />
+    <div ref={setNodeRef} style={style} {...attributes} {...(selectMode ? {} : listeners)} className="relative">
+      {selectMode && (
+        <button
+          onClick={() => onToggleSelect(task.id)}
+          className="absolute top-2 left-2 z-10 w-4 h-4 rounded flex items-center justify-center"
+          style={{
+            background: selected ? 'var(--accent-blue)' : 'var(--surface)',
+            border: `2px solid ${selected ? 'var(--accent-blue)' : 'var(--border)'}`,
+          }}
+        >
+          {selected && <span className="text-white text-[9px]">✓</span>}
+        </button>
+      )}
+      <div style={{ paddingLeft: selectMode ? '4px' : '0' }}>
+        <TaskCard task={task} onClick={() => selectMode ? onToggleSelect(task.id) : onSelect(task)} isDragging={isDragging} />
+      </div>
     </div>
+  )
+}
+
+// ─── Bulk Action Bar ──────────────────────────────────────────────────────────
+
+function BulkActionBar({
+  selectedIds,
+  onMove,
+  onDelete,
+  onClear,
+}: {
+  selectedIds: string[]
+  onMove: (status: TaskStatus) => void
+  onDelete: () => void
+  onClear: () => void
+}) {
+  const [showMove, setShowMove] = useState(false)
+  if (selectedIds.length === 0) return null
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: -8 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -8 }}
+      className="flex items-center gap-2 px-4 py-2.5 rounded-xl mb-3"
+      style={{ background: 'var(--surface)', border: '1px solid var(--accent-blue)', boxShadow: 'var(--shadow-panel)' }}
+    >
+      <span className="text-xs font-semibold" style={{ color: 'var(--accent-blue)' }}>
+        {selectedIds.length} selected
+      </span>
+      <div className="flex items-center gap-1.5 ml-auto">
+        <div className="relative">
+          <button
+            onClick={() => setShowMove((v) => !v)}
+            className="flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-lg font-medium transition-colors"
+            style={{ background: 'var(--surface-muted)', color: 'var(--text)', border: '1px solid var(--border)' }}
+          >
+            <MoveRight size={12} /> Move to
+          </button>
+          {showMove && (
+            <div className="absolute top-full mt-1 left-0 z-50 rounded-lg overflow-hidden shadow-lg" style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}>
+              {(['backlog', 'todo', 'in_progress', 'review', 'done'] as TaskStatus[]).map((s) => (
+                <button key={s} onClick={() => { onMove(s); setShowMove(false) }}
+                  className="block w-full text-left px-3 py-2 text-xs hover:bg-[var(--surface-muted)] transition-colors"
+                  style={{ color: 'var(--text)' }}>
+                  {s.replace('_', ' ')}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+        <button
+          onClick={onDelete}
+          className="flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-lg font-medium transition-colors"
+          style={{ background: 'rgba(185,28,28,0.08)', color: 'var(--danger)', border: '1px solid rgba(185,28,28,0.2)' }}
+        >
+          <Trash2 size={12} /> Delete
+        </button>
+        <button onClick={onClear} className="p-1.5 rounded-lg transition-colors" style={{ color: 'var(--text-quiet)' }}>
+          <X size={13} />
+        </button>
+      </div>
+    </motion.div>
   )
 }
 
@@ -82,9 +162,12 @@ interface KanbanColumnProps {
   config: ColumnConfig
   tasks: Task[]
   onSelect: (task: Task) => void
+  selectedIds: string[]
+  selectMode: boolean
+  onToggleSelect: (id: string) => void
 }
 
-function KanbanColumn({ config, tasks, onSelect }: KanbanColumnProps) {
+function KanbanColumn({ config, tasks, onSelect, selectedIds, selectMode, onToggleSelect }: KanbanColumnProps) {
   const taskIds = tasks.map((t) => t.id)
 
   return (
@@ -126,7 +209,14 @@ function KanbanColumn({ config, tasks, onSelect }: KanbanColumnProps) {
                 </motion.div>
               ) : (
                 tasks.map((task) => (
-                  <SortableTaskItem key={task.id} task={task} onSelect={onSelect} />
+                  <SortableTaskItem
+                    key={task.id}
+                    task={task}
+                    onSelect={onSelect}
+                    selected={selectedIds.includes(task.id)}
+                    selectMode={selectMode}
+                    onToggleSelect={onToggleSelect}
+                  />
                 ))
               )}
             </AnimatePresence>
@@ -286,10 +376,32 @@ export function KanbanBoard({ onTaskSelect }: KanbanBoardProps) {
   const { data: tasks = [], isLoading } = useTasks()
   const updateTask = useUpdateTask()
   const createTask = useCreateTask()
+  const qc = useQueryClient()
 
   const [activeTaskId, setActiveTaskId]     = useState<string | null>(null)
   const [createModalOpen, setCreateModal]   = useState(false)
   const [selectedTask, setSelectedTask]     = useState<Task | null>(null)
+  const [selectMode, setSelectMode]         = useState(false)
+  const [selectedIds, setSelectedIds]       = useState<string[]>([])
+
+  const toggleSelect = useCallback((id: string) => {
+    setSelectedIds((prev) => prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id])
+  }, [])
+
+  const bulkAction = useMutation({
+    mutationFn: async ({ action, status }: { action: 'move' | 'delete'; status?: TaskStatus }) => {
+      await fetch('/api/tasks/bulk', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action, ids: selectedIds, status }),
+      })
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['tasks'] })
+      setSelectedIds([])
+      setSelectMode(false)
+    },
+  })
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } })
@@ -368,15 +480,37 @@ export function KanbanBoard({ onTaskSelect }: KanbanBoardProps) {
             </span>
           )}
         </div>
-        <GlowButton
-          variant="primary"
-          size="sm"
-          icon={<Plus size={14} />}
-          onClick={() => setCreateModal(true)}
-        >
-          New Task
-        </GlowButton>
+        <div className="flex items-center gap-2">
+          <GlowButton
+            variant={selectMode ? 'secondary' : 'ghost'}
+            size="sm"
+            icon={<CheckSquare size={14} />}
+            onClick={() => { setSelectMode((v) => !v); setSelectedIds([]) }}
+          >
+            {selectMode ? 'Done' : 'Select'}
+          </GlowButton>
+          <GlowButton
+            variant="primary"
+            size="sm"
+            icon={<Plus size={14} />}
+            onClick={() => setCreateModal(true)}
+          >
+            New Task
+          </GlowButton>
+        </div>
       </div>
+
+      {/* Bulk action bar */}
+      <AnimatePresence>
+        {selectMode && (
+          <BulkActionBar
+            selectedIds={selectedIds}
+            onMove={(status) => bulkAction.mutate({ action: 'move', status })}
+            onDelete={() => bulkAction.mutate({ action: 'delete' })}
+            onClear={() => { setSelectedIds([]); setSelectMode(false) }}
+          />
+        )}
+      </AnimatePresence>
 
       {/* Board */}
       <DndContext
@@ -393,6 +527,9 @@ export function KanbanBoard({ onTaskSelect }: KanbanBoardProps) {
               config={col}
               tasks={tasksByStatus[col.id]}
               onSelect={(task) => { setSelectedTask(task); onTaskSelect?.(task) }}
+              selectedIds={selectedIds}
+              selectMode={selectMode}
+              onToggleSelect={toggleSelect}
             />
           ))}
         </div>

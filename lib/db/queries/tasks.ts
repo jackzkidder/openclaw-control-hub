@@ -1,6 +1,7 @@
 import { getDb, initDb } from '../index'
 import { nanoid } from 'nanoid'
 import type { Task, CreateTaskInput, UpdateTaskInput } from '../../openclaw/types'
+import { logTaskChange } from './taskHistory'
 
 type Row = Record<string, unknown>
 
@@ -82,6 +83,20 @@ export async function createTask(input: CreateTaskInput): Promise<Task> {
 export async function updateTask(input: UpdateTaskInput): Promise<Task | null> {
   const existing = await getTaskById(input.id)
   if (!existing) return null
+
+  // Log tracked field changes
+  const tracked: Array<[keyof UpdateTaskInput, string]> = [
+    ['status', 'status'],
+    ['priority', 'priority'],
+    ['assignedAgentId', 'assignedAgentId'],
+  ]
+  for (const [field, label] of tracked) {
+    const oldVal = String(existing[label as keyof Task] ?? '')
+    const newVal = String(input[field] ?? existing[label as keyof Task] ?? '')
+    if (oldVal !== newVal) {
+      logTaskChange(input.id, label, oldVal || null, newVal || null).catch(() => {})
+    }
+  }
 
   const db = getDb()
   const now = new Date().toISOString()

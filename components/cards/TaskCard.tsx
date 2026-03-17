@@ -1,10 +1,32 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { Bot, Flame, Calendar, Tag } from 'lucide-react'
+import { Bot, Flame, Calendar, Tag, Clock } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
 import { formatRelativeTime } from '@/lib/utils/formatters'
 import type { Task } from '@/lib/openclaw/types'
+
+function DueBadge({ dueAt }: { dueAt: string }) {
+  const due = new Date(dueAt)
+  const now = new Date()
+  const diffMs = due.getTime() - now.getTime()
+  const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24))
+  const overdue = diffMs < 0
+  const soon = diffDays <= 2 && diffDays >= 0
+  return (
+    <span
+      className="inline-flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-[10px] font-medium"
+      style={{
+        background: overdue ? 'rgba(185,28,28,0.1)' : soon ? 'rgba(180,83,9,0.1)' : 'var(--surface-muted)',
+        color: overdue ? 'var(--danger)' : soon ? 'var(--warning)' : 'var(--text-muted)',
+        border: `1px solid ${overdue ? 'rgba(185,28,28,0.2)' : soon ? 'rgba(180,83,9,0.2)' : 'var(--border)'}`,
+      }}
+    >
+      <Clock size={8} />
+      {overdue ? 'Overdue' : diffDays === 0 ? 'Today' : diffDays === 1 ? 'Tomorrow' : `${diffDays}d`}
+    </span>
+  )
+}
 
 interface TaskCardProps {
   task: Task
@@ -76,6 +98,13 @@ export function TaskCard({ task, onClick, isDragging }: TaskCardProps) {
       {/* Description preview */}
       {task.description && (
         <p className="text-xs line-clamp-2 mb-3" style={{ color: 'var(--text-muted)' }}>{task.description}</p>
+      )}
+
+      {/* Due date */}
+      {task.dueAt && task.status !== 'done' && task.status !== 'cancelled' && (
+        <div className="mb-2">
+          <DueBadge dueAt={task.dueAt} />
+        </div>
       )}
 
       {/* Tags */}

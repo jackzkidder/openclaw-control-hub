@@ -39,11 +39,11 @@ interface ColumnConfig {
 }
 
 const COLUMNS: ColumnConfig[] = [
-  { id: 'backlog',     label: 'Backlog',     color: 'border-slate-500/20',  headerColor: 'bg-slate-500/10 text-slate-400' },
-  { id: 'todo',        label: 'To Do',       color: 'border-blue-500/20',   headerColor: 'bg-blue-500/10 text-blue-400' },
+  { id: 'backlog',     label: 'Backlog',     color: 'border-slate-500/20',  headerColor: 'bg-slate-500/10 text-slate-600 dark:text-slate-400' },
+  { id: 'todo',        label: 'To Do',       color: 'border-blue-500/20',   headerColor: 'bg-blue-500/10 text-blue-700 dark:text-blue-400' },
   { id: 'in_progress', label: 'In Progress', color: 'border-primary/20',    headerColor: 'bg-primary/10 text-primary' },
-  { id: 'review',      label: 'Review',      color: 'border-violet-500/20', headerColor: 'bg-violet-500/10 text-violet-400' },
-  { id: 'done',        label: 'Done',        color: 'border-emerald-500/20',headerColor: 'bg-emerald-500/10 text-emerald-400' },
+  { id: 'review',      label: 'Review',      color: 'border-violet-500/20', headerColor: 'bg-violet-500/10 text-violet-700 dark:text-violet-400' },
+  { id: 'done',        label: 'Done',        color: 'border-emerald-500/20',headerColor: 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400' },
 ]
 
 // ─── Sortable Task Item ───────────────────────────────────────────────────────

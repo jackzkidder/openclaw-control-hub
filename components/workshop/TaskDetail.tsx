@@ -23,19 +23,19 @@ import { cn } from '@/lib/utils/cn'
 // ─── Priority badge config ────────────────────────────────────────────────────
 
 const priorityBadgeConfig = {
-  low:      'bg-slate-500/15 text-slate-400 border border-slate-500/20',
-  medium:   'bg-blue-500/15 text-blue-400 border border-blue-500/20',
-  high:     'bg-amber-500/15 text-amber-400 border border-amber-500/20',
-  critical: 'bg-red-500/15 text-red-400 border border-red-500/20',
+  low:      'bg-slate-500/15 text-slate-600 dark:text-slate-400 border border-slate-500/20',
+  medium:   'bg-blue-500/15 text-blue-700 dark:text-blue-400 border border-blue-500/20',
+  high:     'bg-amber-500/15 text-amber-700 dark:text-amber-400 border border-amber-500/20',
+  critical: 'bg-red-500/15 text-red-700 dark:text-red-400 border border-red-500/20',
 }
 
 const statusBadgeConfig: Record<string, string> = {
-  backlog:     'bg-slate-500/15 text-slate-400 border border-slate-500/20',
-  todo:        'bg-blue-500/15 text-blue-400 border border-blue-500/20',
+  backlog:     'bg-slate-500/15 text-slate-600 dark:text-slate-400 border border-slate-500/20',
+  todo:        'bg-blue-500/15 text-blue-700 dark:text-blue-400 border border-blue-500/20',
   in_progress: 'bg-primary/15 text-primary border border-primary/20',
-  review:      'bg-violet-500/15 text-violet-400 border border-violet-500/20',
-  done:        'bg-emerald-500/15 text-emerald-400 border border-emerald-500/20',
-  cancelled:   'bg-slate-600/15 text-slate-500 border border-slate-600/20',
+  review:      'bg-violet-500/15 text-violet-700 dark:text-violet-400 border border-violet-500/20',
+  done:        'bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20',
+  cancelled:   'bg-slate-600/15 text-slate-600 dark:text-slate-500 border border-slate-600/20',
 }
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
@@ -228,8 +228,8 @@ export function TaskDetail({ task, onClose, onDeploy }: TaskDetailProps) {
                 <DetailRow icon={<Flame size={14} />} label="Momentum Score">
                   <span className={cn(
                     'font-semibold',
-                    task.momentumScore >= 70 ? 'text-amber-400' :
-                    task.momentumScore >= 40 ? 'text-blue-400' :
+                    task.momentumScore >= 70 ? 'text-amber-600 dark:text-amber-400' :
+                    task.momentumScore >= 40 ? 'text-blue-700 dark:text-blue-400' :
                     'text-muted-foreground'
                   )}>
                     {task.momentumScore > 0 ? Math.round(task.momentumScore) : '—'}
@@ -307,8 +307,8 @@ export function TaskDetail({ task, onClose, onDeploy }: TaskDetailProps) {
                   animate={{ opacity: 1, y: 0 }}
                   className="flex items-center gap-2 px-3 py-2 rounded-lg bg-emerald-500/10 border border-emerald-500/20"
                 >
-                  <CheckCircle2 size={13} className="text-emerald-400 flex-shrink-0" />
-                  <p className="text-xs text-emerald-400">Successfully deployed to OpenClaw</p>
+                  <CheckCircle2 size={13} className="text-emerald-700 dark:text-emerald-400 flex-shrink-0" />
+                  <p className="text-xs text-emerald-700 dark:text-emerald-400">Successfully deployed to OpenClaw</p>
                 </motion.div>
               )}
             </div>

@@ -22,7 +22,7 @@ interface UsageBreakdownProps {
 function CustomTooltip({ active, payload, label }: any) {
   if (!active || !payload?.length) return null
   return (
-    <div className="bg-surface-2 border border-white/10 rounded-lg p-3 shadow-modal text-xs">
+    <div className="rounded-lg p-3 text-xs" style={{ background: 'var(--surface)', border: '1px solid var(--border)', boxShadow: 'var(--shadow-panel)' }}>
       <p className="text-muted-foreground mb-2">{label}</p>
       {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
       {payload.map((p: any) => (
@@ -41,7 +41,7 @@ export function UsageBreakdown({ data, title = 'Token Usage by Agent', height = 
       <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-4">{title}</p>
       <ResponsiveContainer width="100%" height={height}>
         <BarChart data={data} margin={{ top: 4, right: 4, bottom: 0, left: 0 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" vertical={false} />
+          <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
           <XAxis
             dataKey="name"
             tick={{ fontSize: 10, fill: '#64748b' }}

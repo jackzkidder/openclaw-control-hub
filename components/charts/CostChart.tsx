@@ -22,7 +22,7 @@ interface CostChartProps {
 function CustomTooltip({ active, payload, label }: any) {
   if (!active || !payload?.length) return null
   return (
-    <div className="bg-surface-2 border border-white/10 rounded-lg p-3 shadow-modal text-xs">
+    <div className="rounded-lg p-3 text-xs" style={{ background: 'var(--surface)', border: '1px solid var(--border)', boxShadow: 'var(--shadow-panel)' }}>
       <p className="text-muted-foreground mb-2">
         {label ? format(parseISO(label), 'MMM d, yyyy') : ''}
       </p>
@@ -54,7 +54,7 @@ export function CostChart({ data, title = 'Daily Cost', height = 200 }: CostChar
               <stop offset="100%" stopColor="#22d3ee" stopOpacity={0} />
             </linearGradient>
           </defs>
-          <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" vertical={false} />
+          <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
           <XAxis
             dataKey="date"
             tickFormatter={(v) => {

@@ -216,34 +216,68 @@ export default function SettingsPage() {
 
     await saveSettings(form)
 
-    let connectOk = false
+    // Step 1: initiate connection
     try {
       const res = await fetch('/api/openclaw/connect', { method: 'POST' })
-      const data: CheckResult = await res.json()
-      connectOk = res.ok && data.ok
-      setChecks((prev) => ({ ...prev, gatewayReachable: connectOk ? 'ok' : 'error' }))
-      if (!connectOk) {
+      if (!res.ok) {
+        const data: CheckResult = await res.json()
+        setChecks((prev) => ({ ...prev, gatewayReachable: 'error', websocketAuthenticated: 'error', webhookReachable: 'error' }))
         setCheckMessages((prev) => ({ ...prev, gatewayReachable: data.message ?? 'Connection failed' }))
+        setIsTesting(false)
+        return
       }
     } catch (err) {
-      setChecks((prev) => ({ ...prev, gatewayReachable: 'error' }))
+      setChecks((prev) => ({ ...prev, gatewayReachable: 'error', websocketAuthenticated: 'error', webhookReachable: 'error' }))
       setCheckMessages((prev) => ({ ...prev, gatewayReachable: err instanceof Error ? err.message : 'Network error' }))
+      setIsTesting(false)
+      return
     }
 
+    // Step 2: poll status until connected or error (max 10s)
     try {
-      const res = await fetch('/api/openclaw/status')
-      const data = await res.json()
-      const wsOk = data.status === 'connected'
-      const webhookOk = data.webhookReachable === true
+      let wsOk = false
+      let webhookOk = false
+      let finalStatus = 'unknown'
+      let finalError = ''
+
+      for (let i = 0; i < 20; i++) {
+        await new Promise<void>((r) => setTimeout(r, 500))
+        const res = await fetch('/api/openclaw/status')
+        const data = await res.json()
+        finalStatus = data.status ?? 'unknown'
+        finalError = data.error ?? ''
+
+        if (finalStatus === 'connected') {
+          wsOk = true
+          break
+        }
+        if (finalStatus === 'error' || finalStatus === 'disconnected') {
+          break
+        }
+      }
+
+      // One-time webhook check after confirming WS is connected
+      if (wsOk && form.webhookBaseUrl) {
+        const wr = await fetch('/api/openclaw/status?checkWebhook=1')
+        const wd = await wr.json()
+        webhookOk = wd.webhookReachable === true
+      }
+
       setChecks((prev) => ({
         ...prev,
+        gatewayReachable: wsOk ? 'ok' : 'error',
         websocketAuthenticated: wsOk ? 'ok' : 'error',
-        webhookReachable: webhookOk ? 'ok' : 'error',
+        webhookReachable: form.webhookBaseUrl ? (webhookOk ? 'ok' : 'error') : 'idle',
       }))
-      if (!wsOk)      setCheckMessages((prev) => ({ ...prev, websocketAuthenticated: data.error ?? `Status: ${data.status ?? 'unknown'}` }))
-      if (!webhookOk) setCheckMessages((prev) => ({ ...prev, webhookReachable: 'Webhook endpoint not reachable' }))
+      if (!wsOk) {
+        const msg = finalError || `Could not connect (status: ${finalStatus})`
+        setCheckMessages((prev) => ({ ...prev, gatewayReachable: msg, websocketAuthenticated: msg }))
+      }
+      if (form.webhookBaseUrl && !webhookOk) {
+        setCheckMessages((prev) => ({ ...prev, webhookReachable: 'Webhook endpoint not reachable' }))
+      }
     } catch {
-      setChecks((prev) => ({ ...prev, websocketAuthenticated: 'error', webhookReachable: 'error' }))
+      setChecks((prev) => ({ ...prev, gatewayReachable: 'error', websocketAuthenticated: 'error', webhookReachable: 'error' }))
     } finally {
       setIsTesting(false)
     }
@@ -309,10 +343,10 @@ export default function SettingsPage() {
                 <div>
                   <label style={labelStyle}>Gateway URL</label>
                   <input
-                    type="url"
+                    type="text"
                     value={form.gatewayUrl}
                     onChange={(e) => updateField('gatewayUrl', e.target.value)}
-                    placeholder="wss://your-gateway.example.com"
+                    placeholder="ws://127.0.0.1:8765"
                     style={inputStyle}
                     onFocus={(e) => {
                       e.currentTarget.style.borderColor = 'var(--info)'

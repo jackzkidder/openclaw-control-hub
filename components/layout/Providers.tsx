@@ -3,11 +3,18 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { ThemeProvider } from 'next-themes'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useGatewayEvents } from '@/hooks/useGatewayEvents'
 
 function GatewayEventListener() {
   useGatewayEvents()
+
+  // Auto-connect to the gateway on startup so the user doesn't have to
+  // manually trigger it from the Settings page each time.
+  useEffect(() => {
+    fetch('/api/openclaw/connect', { method: 'POST' }).catch(() => {})
+  }, [])
+
   return null
 }
 

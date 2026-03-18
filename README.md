@@ -50,7 +50,7 @@ For **Vercel deployment**, open `.env.local` and fill in your Turso database cre
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) — you'll see the Dashboard. Head to **Settings** to connect your OpenClaw gateway.
+Open [http://localhost:3000](http://localhost:3000) — you'll see the Dashboard. The app will automatically attempt to connect to your gateway on startup. Head to **Settings** to configure the gateway URL and API key if needed.
 
 ## Connecting to Your OpenClaw Gateway
 
@@ -78,12 +78,12 @@ Copy `.env.example` to `.env.local` and edit:
 |---|---|---|
 | `TURSO_DATABASE_URL` | Yes (Vercel) | Turso database URL — `libsql://your-db.turso.io` |
 | `TURSO_AUTH_TOKEN` | Yes (Vercel) | Turso auth token |
-| `GATEWAY_URL` | Optional | Pre-configure the gateway WebSocket URL |
-| `GATEWAY_API_KEY` | Optional | Pre-configure the gateway API key |
+| `OPENCLAW_GATEWAY_URL` | Optional | Pre-configure the gateway WebSocket URL |
+| `OPENCLAW_API_KEY` | Optional | Pre-configure the gateway API key |
 
 You can also configure the gateway URL and API key directly in the **Settings** page — no restart required.
 
-**Local development:** The app falls back to a local SQLite database at `./data/openclaw-control.db` when Turso env vars are not set.
+**Local development:** The app falls back to a local SQLite database at `./data/mission-control.db` when Turso env vars are not set.
 
 ## Deploying to Vercel
 
@@ -143,7 +143,7 @@ React components                    ← real-time UI
 - **Framer Motion** — animations
 - **Recharts** — usage/cost charts
 - **Zustand** + **TanStack Query** — state management
-- **better-sqlite3** / **Turso libsql** — storage
+- **Turso libsql** (`@libsql/client`) — storage
 - **ws** — server-side WebSocket client
 - **@dnd-kit** — Kanban drag and drop
 

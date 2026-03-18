@@ -2,6 +2,8 @@
 
 A modern operations dashboard for OpenClaw — monitor agents, tasks, automation, and gateway connections from a single interface.
 
+![Dashboard](docs/screenshots/dashboard.png)
+
 ## Features
 
 - Real-time agent and task monitoring via WebSocket + SSE
@@ -52,6 +54,8 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000) — you'll see the Dashboard. The app will automatically attempt to connect to your gateway on startup. Head to **Settings** to configure the gateway URL and API key if needed.
 
+![Dashboard on first load](docs/screenshots/dashboard-startup.png)
+
 ## Connecting to Your OpenClaw Gateway
 
 OpenClaw Control connects to your gateway over WebSocket. The connection runs **server-side** — your API key never touches the browser.
@@ -66,7 +70,11 @@ OpenClaw Control connects to your gateway over WebSocket. The connection runs **
    - **Gateway URL** — `ws://127.0.0.1:8765` (must include port, must start with `ws://` or `wss://`)
    - **API Key** — your gateway auth token
 
+   ![Settings — gateway fields](docs/screenshots/settings-gateway.png)
+
 3. Click **Test Connection** — all three checks (Gateway, WebSocket, Webhook) should go green.
+
+   ![Settings — successful connection test](docs/screenshots/settings-connected.png)
 
 See [GATEWAY_SETUP.md](./GATEWAY_SETUP.md) for remote and multi-machine setups.
 

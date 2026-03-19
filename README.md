@@ -74,8 +74,6 @@ OpenClaw Control connects to your gateway over WebSocket. The connection runs **
 
 3. Click **Test Connection** — all three checks (Gateway, WebSocket, Webhook) should go green.
 
-   ![Settings — successful connection test](docs/screenshots/settings-connected.png)
-
 See [GATEWAY_SETUP.md](./GATEWAY_SETUP.md) for remote and multi-machine setups.
 
 ## Configuration
